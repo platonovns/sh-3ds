@@ -61,6 +61,29 @@ Do not rename a different version of the game and expect it to work. The port cu
 
 SH-3DS is available as both a **CIA** build and a **3DSX** build.
 
+
+# Compatibility
+
+SH-3DS is designed for the **New Nintendo 3DS family**.
+
+The game has been played from beginning to end on a real New Nintendo 3DS.
+
+My complete hardware playthrough used the **Good+ ending**.
+
+Other endings have not yet been personally tested.
+
+Because this is the first public release, there may still be bugs, unusual save-state interactions or hardware-specific issues that were not encountered during development and testing.
+
+If you encounter a problem, please open an issue and include:
+
+- Where in the game it happened
+- What you were doing immediately before the problem
+- Whether the problem is reproducible
+- Which build you are using
+- Any other information that may help reproduce it
+
+---
+
 ## Features
 
 ### Native New Nintendo 3DS port
@@ -225,8 +248,8 @@ For a playthrough that stays close to the original presentation while using the 
 - **HUD:** Off
 - **HP LED:** On
 - **Lower Screen Auto:** On
-- **Map Invert:** Off
-- **Map Brightness:** 100%
+- **Map Invert:** On/Off by situation
+- **Map Brightness:** 40%
 - **Frame Limit:** Unlocked
 
 This keeps the main gameplay screen relatively close to the original game while using the second screen and 3DS hardware for additional information and quality-of-life features.
@@ -246,28 +269,6 @@ You still need to provide the required `sh1.bin` and `sh1.cue` files on the SD c
 Place the 3DSX build in the appropriate location on your SD card and launch it through the Homebrew Launcher.
 
 The same external game data is required.
-
----
-
-# Compatibility
-
-SH-3DS is designed for the **New Nintendo 3DS family**.
-
-The game has been played from beginning to end on a real New Nintendo 3DS.
-
-My complete hardware playthrough used the **Good+ ending**.
-
-Other endings have not yet been personally tested.
-
-Because this is the first public release, there may still be bugs, unusual save-state interactions or hardware-specific issues that were not encountered during development and testing.
-
-If you encounter a problem, please open an issue and include:
-
-- Where in the game it happened
-- What you were doing immediately before the problem
-- Whether the problem is reproducible
-- Which build you are using
-- Any other information that may help reproduce it
 
 ---
 

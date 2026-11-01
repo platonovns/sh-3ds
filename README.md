@@ -29,6 +29,37 @@ This is **not PlayStation emulation**. The game code runs natively on the New Ni
 SH-3DS does not include any original Silent Hill game data.
 
 ---
+# Game data
+
+SH-3DS does **not** include any original *Silent Hill* game data.
+
+You must provide the required game image from your own legally obtained copy of *Silent Hill*.
+
+Currently, SH-3DS supports:
+
+**Silent Hill — NTSC-U (USA), SLUS-00707 v1.1**
+
+Place your game image on the SD card as:
+
+```text
+sdmc:/3ds/silenthill/sh1.bin
+sdmc:/3ds/silenthill/sh1.cue
+```
+
+The filenames must be exactly:
+
+```text
+sh1.bin
+sh1.cue
+```
+
+Do not rename a different version of the game and expect it to work. The port currently expects the supported **SLUS-00707 v1.1** game data.
+
+---
+
+# Installation
+
+SH-3DS is available as both a **CIA** build and a **3DSX** build.
 
 ## Features
 
@@ -201,38 +232,6 @@ For a playthrough that stays close to the original presentation while using the 
 This keeps the main gameplay screen relatively close to the original game while using the second screen and 3DS hardware for additional information and quality-of-life features.
 
 ---
-
-# Game data
-
-SH-3DS does **not** include any original *Silent Hill* game data.
-
-You must provide the required game image from your own legally obtained copy of *Silent Hill*.
-
-Currently, SH-3DS supports:
-
-**Silent Hill — NTSC-U (USA), SLUS-00707 v1.1**
-
-Place your game image on the SD card as:
-
-```text
-sdmc:/3ds/silenthill/sh1.bin
-sdmc:/3ds/silenthill/sh1.cue
-```
-
-The filenames must be exactly:
-
-```text
-sh1.bin
-sh1.cue
-```
-
-Do not rename a different version of the game and expect it to work. The port currently expects the supported **SLUS-00707 v1.1** game data.
-
----
-
-# Installation
-
-SH-3DS is available as both a **CIA** build and a **3DSX** build.
 
 ## CIA
 

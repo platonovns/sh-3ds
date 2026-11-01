@@ -1,7 +1,8 @@
 # sh-3ds
 Native Silent Hill (1999) port on nintendo new 3ds (based on pc port)
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/cc030cd1-16b9-4155-a4c7-993b8a2f0fe0" />
+<img width="1200" height="800" alt="sh-3ds-comics" src="https://github.com/user-attachments/assets/1cf5bf3c-a3b2-4efe-895b-41522bafca50" />
+
 
 [!IMPORTANT]
 Development status

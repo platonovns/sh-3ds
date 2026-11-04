@@ -1,0 +1,499 @@
+{
+  "status": "PASS",
+  "character_components_compiled": 7,
+  "table_components_compiled": 7,
+  "checks": [
+    {
+      "map": "map3_s00",
+      "table": "KAUFMANN_ANIM_INFOS",
+      "entries": 46,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s02",
+      "table": "ALESSA_ANIM_INFOS",
+      "entries": 22,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s04",
+      "table": "LISA_ANIM_INFOS",
+      "entries": 36,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s06",
+      "table": "DAHLIA_M3S06_ANIM_INFOS",
+      "entries": 52,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s01",
+      "table": "CREEPER_ANIM_INFOS",
+      "entries": 36,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s02",
+      "table": "CREEPER_ANIM_INFOS",
+      "entries": 36,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s05",
+      "table": "CREEPER_ANIM_INFOS",
+      "entries": 36,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s03",
+      "table": "BLOODSUCKER_ANIM_INFOS",
+      "entries": 30,
+      "result": "PASS"
+    },
+    {
+      "map": "map3_s03",
+      "table": "PuppetNurseData",
+      "variants": 4,
+      "entries": 184,
+      "all_scalar_bytes_and_native_callbacks": "PASS"
+    },
+    {
+      "map": "map3_s04",
+      "table": "PuppetNurseData",
+      "variants": 4,
+      "entries": 184,
+      "all_scalar_bytes_and_native_callbacks": "PASS"
+    },
+    {
+      "map": "map3_s05",
+      "table": "PuppetNurseData",
+      "variants": 4,
+      "entries": 184,
+      "all_scalar_bytes_and_native_callbacks": "PASS"
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 0,
+      "damage": 409600,
+      "result": [
+        3072000,
+        2662400,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397484
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 0,
+      "damage": 12288000,
+      "result": [
+        3072000,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397484
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 1,
+      "damage": 409600,
+      "result": [
+        1638400,
+        1228800,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397536
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 1,
+      "damage": 12288000,
+      "result": [
+        1638400,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397536
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 2,
+      "damage": 409600,
+      "result": [
+        2662400,
+        2252800,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397588
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 2,
+      "damage": 12288000,
+      "result": [
+        2662400,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397588
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 3,
+      "damage": 409600,
+      "result": [
+        3276800,
+        2867200,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397640
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": -1,
+      "variant": 3,
+      "damage": 12288000,
+      "result": [
+        3276800,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397640
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 0,
+      "damage": 409600,
+      "result": [
+        3072000,
+        2662400,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397484
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 0,
+      "damage": 12288000,
+      "result": [
+        3072000,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397484
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 1,
+      "damage": 409600,
+      "result": [
+        1638400,
+        1228800,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397536
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 1,
+      "damage": 12288000,
+      "result": [
+        1638400,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397536
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 2,
+      "damage": 409600,
+      "result": [
+        2662400,
+        2252800,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397588
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 2,
+      "damage": 12288000,
+      "result": [
+        2662400,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397588
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 3,
+      "damage": 409600,
+      "result": [
+        3276800,
+        2867200,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397640
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 0,
+      "variant": 3,
+      "damage": 12288000,
+      "result": [
+        3276800,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397640
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 0,
+      "damage": 409600,
+      "result": [
+        3072000,
+        2662400,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397484
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 0,
+      "damage": 12288000,
+      "result": [
+        3072000,
+        0,
+        4,
+        1,
+        4294967295,
+        0,
+        34,
+        10397484
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 1,
+      "damage": 409600,
+      "result": [
+        1638400,
+        1228800,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397536
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 1,
+      "damage": 12288000,
+      "result": [
+        1638400,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397536
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 2,
+      "damage": 409600,
+      "result": [
+        2662400,
+        2252800,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397588
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 2,
+      "damage": 12288000,
+      "result": [
+        2662400,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397588
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 3,
+      "damage": 409600,
+      "result": [
+        3276800,
+        2867200,
+        11,
+        0,
+        4294967295,
+        0,
+        34,
+        10397640
+      ]
+    },
+    {
+      "case": "original_nurse_doctor_damage",
+      "difficulty": 1,
+      "variant": 3,
+      "damage": 12288000,
+      "result": [
+        3276800,
+        0,
+        4,
+        1,
+        4294967294,
+        0,
+        34,
+        10397640
+      ]
+    },
+    {
+      "case": "harry_map_animation_binary_equivalence_and_native_calls",
+      "map": "map3_s00",
+      "entries": 11
+    },
+    {
+      "case": "harry_map_animation_binary_equivalence_and_native_calls",
+      "map": "map3_s01",
+      "entries": 31
+    },
+    {
+      "case": "harry_map_animation_binary_equivalence_and_native_calls",
+      "map": "map3_s02",
+      "entries": 27
+    },
+    {
+      "case": "harry_map_animation_binary_equivalence_and_native_calls",
+      "map": "map3_s03",
+      "entries": 33
+    },
+    {
+      "case": "harry_map_animation_binary_equivalence_and_native_calls",
+      "map": "map3_s04",
+      "entries": 35
+    },
+    {
+      "case": "harry_map_animation_binary_equivalence_and_native_calls",
+      "map": "map3_s05",
+      "entries": 39
+    },
+    {
+      "case": "harry_map_animation_binary_equivalence_and_native_calls",
+      "map": "map3_s06",
+      "entries": 11
+    }
+  ],
+  "scope": "ARM component execution and original-BIN parity; no gameplay/hardware claim",
+  "full_game_elf": "3ds_port/build/alchemilla/alchemilla-content.elf",
+  "elf_sha256": "a2d1781304ab9c8e5599a08b20bd50400956866d5c15b66da059813b519e838d",
+  "full_game_checks": "PASS"
+}

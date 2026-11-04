@@ -1,0 +1,11 @@
+{
+  "src/gte/PsyX_GTE.cpp": "79fd2e23099a27e2ef9ee81c7e4e8f37e0b338c83887b0a682239bfbe4a235d3",
+  "src/gte/PsyX_GTE.h": "adc3bc03ad0b31318387c3ec6fe5e6a14e937ce6122469e8bab5ffe8a3ea38ac",
+  "src/gte/rcossin_tbl.h": "bd925bdc896c6f340dea2389aeffa8407c84e1285ebd9b4e4df573419b3eb087",
+  "src/gte/ratan_tbl.h": "5e308ac8a41342df3fb11777d7581fb96a012d6a844b8399cc38f79fc4838878",
+  "src/gte/sqrt_tbl.h": "724474073cbb88de6f0ce0d5a88d6c478bfa831431f193e294f77676d0d9b1a3",
+  "src/psx/libgte.c": "c30c2243cc48d0f00c82db8f201cda2d5b606d5edd05eacfb2ff467031a488b2",
+  "src/psx/inline_c.c": "142bc5553cf68a75177902340f08a8bff258cad5605a49a3b6e4176abce7f48a",
+  "include/psx/inline_c.h": "9d0af2f924680b04b36f19386e60991d27d09af36ff7732b7e802532de99fec0",
+  "include/psx/libgpu.h": "c63a473f6473b69f0ab72bda3ca9dfafbdfbc710f1a907536da2988e538bd445"
+}

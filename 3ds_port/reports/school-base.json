@@ -1,0 +1,6 @@
+{
+  "base": "stage11a-cpu-B-src-8c51d74ee1feb7e0",
+  "archive_sha256": "0007523284e2c5a57fbf9bb4104d498e5f7baa7b4de409a6e1916ee87b6f20a5",
+  "branch": "codex/school-completion",
+  "scope": "INTERNAL_CONTENT_CHECKPOINT_NO_HARDWARE_CANDIDATE"
+}

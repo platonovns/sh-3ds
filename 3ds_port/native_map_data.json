@@ -1,0 +1,326 @@
+[
+  {
+    "symbol": "D_800DD593",
+    "address": "0x800DD593"
+  },
+  {
+    "symbol": "D_800DD594",
+    "address": "0x800DD594"
+  },
+  {
+    "symbol": "D_800DF1CC",
+    "address": "0x800DF1CC"
+  },
+  {
+    "symbol": "D_800DFAB8",
+    "address": "0x800DFAB8"
+  },
+  {
+    "symbol": "D_800DFAC2",
+    "address": "0x800DFAC2"
+  },
+  {
+    "symbol": "D_800DFACC",
+    "address": "0x800DFACC"
+  },
+  {
+    "symbol": "D_800DFAD0",
+    "address": "0x800DFAD0"
+  },
+  {
+    "symbol": "D_800DFAD4",
+    "address": "0x800DFAD4"
+  },
+  {
+    "symbol": "D_800DFADC",
+    "address": "0x800DFADC"
+  },
+  {
+    "symbol": "D_800DFAE0",
+    "address": "0x800DFAE0"
+  },
+  {
+    "symbol": "D_800DFB28",
+    "address": "0x800DFB28"
+  },
+  {
+    "symbol": "D_800DFB40",
+    "address": "0x800DFB40"
+  },
+  {
+    "symbol": "D_800DFB44",
+    "address": "0x800DFB44"
+  },
+  {
+    "symbol": "D_800DFB48",
+    "address": "0x800DFB48"
+  },
+  {
+    "symbol": "D_800DFB54",
+    "address": "0x800DFB54"
+  },
+  {
+    "symbol": "D_800DFB5C",
+    "address": "0x800DFB5C"
+  },
+  {
+    "symbol": "D_800DFB60",
+    "address": "0x800DFB60"
+  },
+  {
+    "symbol": "D_800E0C64",
+    "address": "0x800E0C64"
+  },
+  {
+    "symbol": "D_800E0C74",
+    "address": "0x800E0C74"
+  },
+  {
+    "symbol": "D_800E32DC",
+    "address": "0x800E32DC"
+  },
+  {
+    "symbol": "D_800E34EC",
+    "address": "0x800E34EC"
+  },
+  {
+    "symbol": "D_800E39AC",
+    "address": "0x800E39AC"
+  },
+  {
+    "symbol": "D_800E3A30",
+    "address": "0x800E3A30"
+  },
+  {
+    "symbol": "D_800E3A5C",
+    "address": "0x800E3A5C"
+  },
+  {
+    "symbol": "D_800E3A9C",
+    "address": "0x800E3A9C"
+  },
+  {
+    "symbol": "D_800E3AAC",
+    "address": "0x800E3AAC"
+  },
+  {
+    "symbol": "g_Effect_BloodSplats",
+    "address": "0x800E0B1C"
+  },
+  {
+    "symbol": "g_ParticleMapIdx0",
+    "address": "0x800DFB4C"
+  },
+  {
+    "symbol": "g_ParticleMapIdx1",
+    "address": "0x800DFB50"
+  },
+  {
+    "symbol": "g_ParticleSpawnCount",
+    "address": "0x800E3262"
+  },
+  {
+    "symbol": "g_ParticleVectors0",
+    "address": "0x800E0C4C"
+  },
+  {
+    "symbol": "g_ParticleVectors1",
+    "address": "0x800E0C7C"
+  },
+  {
+    "symbol": "g_Particle_Position",
+    "address": "0x800E323C"
+  },
+  {
+    "symbol": "g_Particle_PrevPosition",
+    "address": "0x800E324C"
+  },
+  {
+    "symbol": "g_Particle_PrevRotationY",
+    "address": "0x800E3260"
+  },
+  {
+    "symbol": "g_Particle_RotationY",
+    "address": "0x800E0C6E"
+  },
+  {
+    "symbol": "g_Particle_SpeedX",
+    "address": "0x800DFB64"
+  },
+  {
+    "symbol": "g_Particle_SpeedZ",
+    "address": "0x800DFB68"
+  },
+  {
+    "symbol": "g_Particles",
+    "address": "0x800E0CBC"
+  },
+  {
+    "symbol": "sharedData_800DD58C_0_s00",
+    "address": "0x800DD58C"
+  },
+  {
+    "symbol": "sharedData_800DD5A0_0_s00",
+    "address": "0x800DD5A0"
+  },
+  {
+    "symbol": "sharedData_800DD5A4_0_s00",
+    "address": "0x800DD5A4"
+  },
+  {
+    "symbol": "sharedData_800DD5A6_0_s00",
+    "address": "0x800DD5A6"
+  },
+  {
+    "symbol": "sharedData_800DF1F4_0_s00",
+    "address": "0x800DF1F4"
+  },
+  {
+    "symbol": "sharedData_800DF1F8_0_s00",
+    "address": "0x800DF1F8"
+  },
+  {
+    "symbol": "sharedData_800DF1FA_0_s00",
+    "address": "0x800DF1FA"
+  },
+  {
+    "symbol": "sharedData_800DFB6C_0_s00",
+    "address": "0x800DFB6C"
+  },
+  {
+    "symbol": "sharedData_800DFB70_0_s00",
+    "address": "0x800DFB70"
+  },
+  {
+    "symbol": "sharedData_800DFB7C_0_s00",
+    "address": "0x800DFB7C"
+  },
+  {
+    "symbol": "sharedData_800E0CA8_0_s00",
+    "address": "0x800E0CA8"
+  },
+  {
+    "symbol": "sharedData_800E0CAC_0_s00",
+    "address": "0x800E0CAC"
+  },
+  {
+    "symbol": "sharedData_800E0CB0_0_s00",
+    "address": "0x800E0CB0"
+  },
+  {
+    "symbol": "sharedData_800E0CB4_0_s00",
+    "address": "0x800E0CB4"
+  },
+  {
+    "symbol": "sharedData_800E0CB6_0_s00",
+    "address": "0x800E0CB6"
+  },
+  {
+    "symbol": "sharedData_800E0CB8_0_s00",
+    "address": "0x800E0CB8"
+  },
+  {
+    "symbol": "sharedData_800E0CBA_0_s00",
+    "address": "0x800E0CBA"
+  },
+  {
+    "symbol": "sharedData_800E3258_0_s00",
+    "address": "0x800E3258"
+  },
+  {
+    "symbol": "sharedData_800E325C_0_s00",
+    "address": "0x800E325C"
+  },
+  {
+    "symbol": "sharedData_800E326C_0_s00",
+    "address": "0x800E326C"
+  },
+  {
+    "symbol": "sharedData_800E32CC_0_s00",
+    "address": "0x800E32CC"
+  },
+  {
+    "symbol": "sharedData_800E32D0_0_s00",
+    "address": "0x800E32D0"
+  },
+  {
+    "symbol": "sharedData_800E32D4_0_s00",
+    "address": "0x800E32D4"
+  },
+  {
+    "symbol": "sharedData_800E330C_0_s00",
+    "address": "0x800E330C"
+  },
+  {
+    "symbol": "sharedData_800E34FC_0_s00",
+    "address": "0x800E34FC"
+  },
+  {
+    "symbol": "sharedData_800E39BC_0_s00",
+    "address": "0x800E39BC"
+  },
+  {
+    "symbol": "sharedData_800E39D8_0_s00",
+    "address": "0x800E39D8"
+  },
+  {
+    "symbol": "sharedData_800E39E0_0_s00",
+    "address": "0x800E39E0"
+  },
+  {
+    "symbol": "sharedData_800E39E2_0_s00",
+    "address": "0x800E39E2"
+  },
+  {
+    "symbol": "sharedData_800E39E4_0_s00",
+    "address": "0x800E39E4"
+  },
+  {
+    "symbol": "sharedData_800E39E8_0_s00",
+    "address": "0x800E39E8"
+  },
+  {
+    "symbol": "sharedData_800E39EC_0_s00",
+    "address": "0x800E39EC"
+  },
+  {
+    "symbol": "sharedData_800E3A0C_0_s00",
+    "address": "0x800E3A0C"
+  },
+  {
+    "symbol": "sharedData_800E3A18_0_s00",
+    "address": "0x800E3A18"
+  },
+  {
+    "symbol": "sharedData_800E3A1C_0_s00",
+    "address": "0x800E3A1C"
+  },
+  {
+    "symbol": "sharedData_800E3A20_0_s00",
+    "address": "0x800E3A20"
+  },
+  {
+    "symbol": "sharedData_800E3A24_0_s00",
+    "address": "0x800E3A24"
+  },
+  {
+    "symbol": "sharedData_800E3A28_0_s00",
+    "address": "0x800E3A28"
+  },
+  {
+    "symbol": "sharedData_800E3A2C_0_s00",
+    "address": "0x800E3A2C"
+  },
+  {
+    "symbol": "g_Cutscene_CameraPositionTarget",
+    "address": "0x800E3A3C"
+  },
+  {
+    "symbol": "g_Cutscene_CameraLookAtTarget",
+    "address": "0x800E3A4C"
+  },
+  {
+    "symbol": "sharedData_800D32A0_0_s02",
+    "address": "0x800E39DC"
+  }
+]

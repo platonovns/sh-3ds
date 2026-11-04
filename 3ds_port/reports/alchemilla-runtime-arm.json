@@ -1,0 +1,750 @@
+{
+  "status": "PASS",
+  "execution": "Short real-disc map initialization checks; synthetic chapter entry states.\n\nOriginal MainLoop, retail map/ANM/IPD reads and native init/update execute.\nNo continuous route replay; audio/SDK/GPU use the established ARM runner hooks.\n",
+  "results": [
+    {
+      "context": "CPU diagnostic, original MainLoop; no visual/hardware acceptance",
+      "frames": 438,
+      "state": 11,
+      "step": 2,
+      "draw_packets": 42687,
+      "max_draws_per_submission": 312,
+      "first_map_state_frame": 397,
+      "last_events": [
+        {
+          "state": 0,
+          "step": 3,
+          "frame": 82
+        },
+        {
+          "state": 7,
+          "step": 0,
+          "frame": 139
+        },
+        {
+          "state": 7,
+          "step": 1,
+          "frame": 140
+        },
+        {
+          "phase": "PLAYER_INIT_WORLD",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_BONES",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_DONE",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "MAP_OVERLAY_BOUND",
+          "detail": 15,
+          "frame": 289
+        },
+        {
+          "state": 9,
+          "step": 0,
+          "frame": 325
+        },
+        {
+          "state": 10,
+          "step": 0,
+          "frame": 328
+        },
+        {
+          "state": 10,
+          "step": 3,
+          "frame": 329
+        },
+        {
+          "state": 10,
+          "step": 4,
+          "frame": 330
+        },
+        {
+          "state": 10,
+          "step": 5,
+          "frame": 331
+        },
+        {
+          "state": 10,
+          "step": 6,
+          "frame": 332
+        },
+        {
+          "state": 10,
+          "step": 7,
+          "frame": 348
+        },
+        {
+          "state": 10,
+          "step": 8,
+          "frame": 349
+        },
+        {
+          "state": 10,
+          "step": 9,
+          "frame": 371
+        },
+        {
+          "state": 10,
+          "step": 10,
+          "frame": 374
+        },
+        {
+          "state": 10,
+          "step": 11,
+          "frame": 377
+        },
+        {
+          "phase": "MAP0_INIT_BEGIN",
+          "detail": 15,
+          "frame": 387
+        },
+        {
+          "phase": "MAP0_INIT_DONE",
+          "detail": 15,
+          "frame": 395
+        },
+        {
+          "state": 10,
+          "step": 12,
+          "frame": 396
+        },
+        {
+          "state": 11,
+          "step": 0,
+          "frame": 397
+        },
+        {
+          "state": 11,
+          "step": 2,
+          "frame": 398
+        },
+        {
+          "phase": "MAP0_OT_BUILT",
+          "detail": 15,
+          "frame": 398
+        }
+      ],
+      "max_texture_pairs_per_submission": 19,
+      "last_packets": [
+        {
+          "ptr": "0x7f243c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2434",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f242c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2424",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f241c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2414",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f240c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2404",
+          "length": 0,
+          "words": []
+        }
+      ],
+      "failure": null,
+      "invalid": [],
+      "exception": null,
+      "pc": "0x14b6cc",
+      "elapsed_seconds": 61.841,
+      "map": 15,
+      "arrival_pose_source": "map2_s02",
+      "arrival_pose_index": 19,
+      "room": 1,
+      "stable_control_ticks": 20,
+      "game_ticks": 21
+    },
+    {
+      "context": "CPU diagnostic, original MainLoop; no visual/hardware acceptance",
+      "frames": 448,
+      "state": 11,
+      "step": 2,
+      "draw_packets": 44465,
+      "max_draws_per_submission": 394,
+      "first_map_state_frame": 407,
+      "last_events": [
+        {
+          "state": 0,
+          "step": 3,
+          "frame": 82
+        },
+        {
+          "state": 7,
+          "step": 0,
+          "frame": 139
+        },
+        {
+          "state": 7,
+          "step": 1,
+          "frame": 140
+        },
+        {
+          "phase": "PLAYER_INIT_WORLD",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_BONES",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_DONE",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "MAP_OVERLAY_BOUND",
+          "detail": 18,
+          "frame": 289
+        },
+        {
+          "state": 9,
+          "step": 0,
+          "frame": 325
+        },
+        {
+          "state": 10,
+          "step": 0,
+          "frame": 328
+        },
+        {
+          "state": 10,
+          "step": 3,
+          "frame": 329
+        },
+        {
+          "state": 10,
+          "step": 4,
+          "frame": 330
+        },
+        {
+          "state": 10,
+          "step": 5,
+          "frame": 331
+        },
+        {
+          "state": 10,
+          "step": 6,
+          "frame": 332
+        },
+        {
+          "state": 10,
+          "step": 7,
+          "frame": 373
+        },
+        {
+          "state": 10,
+          "step": 8,
+          "frame": 374
+        },
+        {
+          "state": 10,
+          "step": 9,
+          "frame": 391
+        },
+        {
+          "state": 10,
+          "step": 10,
+          "frame": 394
+        },
+        {
+          "state": 10,
+          "step": 11,
+          "frame": 397
+        },
+        {
+          "phase": "MAP0_INIT_BEGIN",
+          "detail": 18,
+          "frame": 397
+        },
+        {
+          "phase": "MAP0_INIT_DONE",
+          "detail": 18,
+          "frame": 405
+        },
+        {
+          "state": 10,
+          "step": 12,
+          "frame": 406
+        },
+        {
+          "state": 11,
+          "step": 0,
+          "frame": 407
+        },
+        {
+          "state": 11,
+          "step": 2,
+          "frame": 408
+        },
+        {
+          "phase": "MAP0_OT_BUILT",
+          "detail": 18,
+          "frame": 408
+        }
+      ],
+      "max_texture_pairs_per_submission": 17,
+      "last_packets": [
+        {
+          "ptr": "0x7f243c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2434",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f242c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2424",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f241c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2414",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f240c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2404",
+          "length": 0,
+          "words": []
+        }
+      ],
+      "failure": null,
+      "invalid": [],
+      "exception": null,
+      "pc": "0x14b6cc",
+      "elapsed_seconds": 78.541,
+      "map": 18,
+      "arrival_pose_source": "map3_s02",
+      "arrival_pose_index": 15,
+      "room": 38,
+      "stable_control_ticks": 20,
+      "game_ticks": 21
+    },
+    {
+      "context": "CPU diagnostic, original MainLoop; no visual/hardware acceptance",
+      "frames": 438,
+      "state": 11,
+      "step": 2,
+      "draw_packets": 56822,
+      "max_draws_per_submission": 1011,
+      "first_map_state_frame": 397,
+      "last_events": [
+        {
+          "state": 0,
+          "step": 2,
+          "frame": 81
+        },
+        {
+          "state": 0,
+          "step": 3,
+          "frame": 82
+        },
+        {
+          "state": 7,
+          "step": 0,
+          "frame": 139
+        },
+        {
+          "state": 7,
+          "step": 1,
+          "frame": 140
+        },
+        {
+          "phase": "PLAYER_INIT_WORLD",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_BONES",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_DONE",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "MAP_OVERLAY_BOUND",
+          "detail": 21,
+          "frame": 289
+        },
+        {
+          "state": 9,
+          "step": 0,
+          "frame": 325
+        },
+        {
+          "state": 10,
+          "step": 0,
+          "frame": 328
+        },
+        {
+          "state": 10,
+          "step": 3,
+          "frame": 329
+        },
+        {
+          "state": 10,
+          "step": 4,
+          "frame": 330
+        },
+        {
+          "state": 10,
+          "step": 5,
+          "frame": 331
+        },
+        {
+          "state": 10,
+          "step": 7,
+          "frame": 332
+        },
+        {
+          "state": 10,
+          "step": 8,
+          "frame": 333
+        },
+        {
+          "state": 10,
+          "step": 9,
+          "frame": 355
+        },
+        {
+          "state": 10,
+          "step": 10,
+          "frame": 358
+        },
+        {
+          "state": 10,
+          "step": 11,
+          "frame": 361
+        },
+        {
+          "phase": "MAP0_INIT_BEGIN",
+          "detail": 21,
+          "frame": 387
+        },
+        {
+          "phase": "MAP0_INIT_DONE",
+          "detail": 21,
+          "frame": 395
+        },
+        {
+          "state": 10,
+          "step": 12,
+          "frame": 396
+        },
+        {
+          "state": 11,
+          "step": 0,
+          "frame": 397
+        },
+        {
+          "state": 11,
+          "step": 2,
+          "frame": 398
+        },
+        {
+          "phase": "MAP0_OT_BUILT",
+          "detail": 21,
+          "frame": 398
+        }
+      ],
+      "max_texture_pairs_per_submission": 22,
+      "last_packets": [
+        {
+          "ptr": "0x7f243c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2434",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f242c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2424",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f241c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2414",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f240c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2404",
+          "length": 0,
+          "words": []
+        }
+      ],
+      "failure": null,
+      "invalid": [],
+      "exception": null,
+      "pc": "0x14b6cc",
+      "elapsed_seconds": 110.792,
+      "map": 21,
+      "arrival_pose_source": "map3_s04",
+      "arrival_pose_index": 39,
+      "room": 3,
+      "stable_control_ticks": 20,
+      "game_ticks": 21
+    },
+    {
+      "context": "CPU diagnostic, original MainLoop; no visual/hardware acceptance",
+      "frames": 472,
+      "state": 11,
+      "step": 2,
+      "draw_packets": 45960,
+      "max_draws_per_submission": 477,
+      "first_map_state_frame": 431,
+      "last_events": [
+        {
+          "state": 0,
+          "step": 3,
+          "frame": 82
+        },
+        {
+          "state": 7,
+          "step": 0,
+          "frame": 139
+        },
+        {
+          "state": 7,
+          "step": 1,
+          "frame": 140
+        },
+        {
+          "phase": "PLAYER_INIT_WORLD",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_BONES",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "PLAYER_INIT_DONE",
+          "detail": 0,
+          "frame": 289
+        },
+        {
+          "phase": "MAP_OVERLAY_BOUND",
+          "detail": 12,
+          "frame": 289
+        },
+        {
+          "state": 9,
+          "step": 0,
+          "frame": 325
+        },
+        {
+          "state": 10,
+          "step": 0,
+          "frame": 328
+        },
+        {
+          "state": 10,
+          "step": 3,
+          "frame": 329
+        },
+        {
+          "state": 10,
+          "step": 4,
+          "frame": 330
+        },
+        {
+          "state": 10,
+          "step": 5,
+          "frame": 331
+        },
+        {
+          "state": 10,
+          "step": 6,
+          "frame": 332
+        },
+        {
+          "state": 10,
+          "step": 7,
+          "frame": 378
+        },
+        {
+          "state": 10,
+          "step": 8,
+          "frame": 379
+        },
+        {
+          "state": 10,
+          "step": 9,
+          "frame": 415
+        },
+        {
+          "state": 10,
+          "step": 10,
+          "frame": 418
+        },
+        {
+          "state": 10,
+          "step": 11,
+          "frame": 421
+        },
+        {
+          "phase": "MAP0_INIT_BEGIN",
+          "detail": 12,
+          "frame": 421
+        },
+        {
+          "phase": "MAP0_INIT_DONE",
+          "detail": 12,
+          "frame": 429
+        },
+        {
+          "state": 10,
+          "step": 12,
+          "frame": 430
+        },
+        {
+          "state": 11,
+          "step": 0,
+          "frame": 431
+        },
+        {
+          "state": 11,
+          "step": 2,
+          "frame": 432
+        },
+        {
+          "phase": "MAP0_OT_BUILT",
+          "detail": 12,
+          "frame": 432
+        }
+      ],
+      "max_texture_pairs_per_submission": 23,
+      "last_packets": [
+        {
+          "ptr": "0x7f243c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2434",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f242c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2424",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f241c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2414",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f240c",
+          "length": 0,
+          "words": []
+        },
+        {
+          "ptr": "0x7f2404",
+          "length": 0,
+          "words": []
+        }
+      ],
+      "failure": null,
+      "invalid": [],
+      "exception": null,
+      "pc": "0x14b6cc",
+      "elapsed_seconds": 111.007,
+      "map": 12,
+      "arrival_pose_source": "map3_s06",
+      "arrival_pose_index": 1,
+      "room": 15,
+      "stable_control_ticks": 20,
+      "game_ticks": 21
+    }
+  ],
+  "elf_sha256": "a2d1781304ab9c8e5599a08b20bd50400956866d5c15b66da059813b519e838d",
+  "hardware_accepted": false,
+  "full_playthrough": false,
+  "original_memcard_written": false
+}

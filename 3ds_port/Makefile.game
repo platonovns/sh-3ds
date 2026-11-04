@@ -1,0 +1,284 @@
+# Separate native game application. The accepted diagnostic target stays intact.
+TOPDIR := $(CURDIR)
+include $(DEVKITARM)/3ds_rules
+include engine_sources.mk
+GAME_BUILD := $(TOPDIR)/build-game
+OUTPUT := $(TOPDIR)/silenthill_game
+ARCH := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
+GAME_SOURCES := sys/game_main.c sys/syswork_globals.c screen/screen_data.c \
+ screen/screen_draw.c screen/screen_fade.c screen/background_draw.c \
+ events/title.c text/text_draw.c text/text_debug_draw.c sys/fs_screens.c sys/settings_reset.c \
+ sys/joy.c sys/vsync.c sys/memcard_2.c sys/chara_data_info.c \
+ game_boot/game_load.c game_boot/game_boot.c gfx/world_draw.c \
+ bodyprog_8005E0DC.c demo.c sys/warm_boot.c items/item_screens_cam.c water.c \
+ gfx/bodyprog_anim_800445A4.c player_control.c \
+ gfx/bodyprog_80040B74.c gfx/bodyprog_80055028.c gfx/map_effects.c \
+ collision/collision.c view/vw_main.c view/vw_calc.c bodyprog_math_8005BF38.c \
+ gfx/bodyprog_bone_80044F14.c game_boot/fs_chara_anim.c events/game_sys_states.c \
+ game_boot/chara_init.c game_boot/load_screen.c events/player_pos_update.c \
+ view/vc_main.c view/vc_util.c sys/map_info.c \
+ events/events_main.c events/collision_trigger.c collision/trigger.c collision/ray.c \
+ collision/chara.c collision/los.c dms.c chara_spawn.c events/npc_main.c \
+ bodyprog_combat_8005BF38.c bodyprog_combat_8008A058.c bodyprog_80085D78.c \
+ bodyprog_data_80028B94.c screen/cutscene_border.c events/bodyprog_data_800A99B4.c \
+ events/bgm.c game_boot/background_sound_init.c events/radio.c events/map_type_get.c \
+ text/map_msg_display.c text/bodyprog_8004B45C.c events/collision_flags_update.c text/bodyprog_8003652C.c \
+ bodyprog_bgm_80087EA8.c items/item_screens_1.c items/item_screens_2.c items/item_screens_3.c events/events_util.c memcard.c \
+ sound/sfx.c sound/sound_data.c bodyprog_mapscreen_80066D90.c bodyprog_mapscreen_80066EB0.c bodyprog_800881B8.c credits_init.c ranking.c
+MAP_SOURCES := player.c map0_s00_2.c map0_s00_anim_info.c map0_s00_events_data.c \
+ map0_s00_header.c Chara_Cheryl.c Chara_Stalker.c particle.c
+MAP_OBJECTS := $(addprefix $(GAME_BUILD)/map0_s00/,$(MAP_SOURCES:.c=.o)) $(GAME_BUILD)/map0_s00/extracted.o
+CAFE_SOURCES := player.c map0_s01_2.c map0_s01_anim_info.c map0_s01_events_data.c \
+ map0_s01_events.c map0_s01_header.c Chara_Cybil.c Chara_AirScreamer.c particle.c particle_glass.c
+CAFE_OBJECTS := $(addprefix $(GAME_BUILD)/map0_s01/,$(CAFE_SOURCES:.c=.o)) $(GAME_BUILD)/map0_s01/extracted.o
+MAP_OBJECTS += $(GAME_BUILD)/map0_s01.native.o
+TOWN_SOURCES := player.c map2_s00.c map2_s00_anim_info.c map2_s00_events_data.c \
+ map2_s00_header.c Chara_AirScreamer.c Chara_Groaner.c particle.c
+TOWN_OBJECTS := $(addprefix $(GAME_BUILD)/map2_s00/,$(TOWN_SOURCES:.c=.o)) $(GAME_BUILD)/map2_s00/extracted.o
+MAP_OBJECTS += $(GAME_BUILD)/map2_s00.native.o
+HOUSE_SOURCES := player.c map0_s02.c map0_s02_anim_info.c map0_s02_events_data.c \
+ map0_s02_events.c map0_s02_header.c particle.c
+HOUSE_OBJECTS := $(addprefix $(GAME_BUILD)/map0_s02/,$(HOUSE_SOURCES:.c=.o)) $(GAME_BUILD)/map0_s02/extracted.o
+SCHOOL_SOURCES := player.c map1_s00.c map1_s00_anim_info.c map1_s00_events_data.c \
+ map1_s00_header.c Chara_Stalker.c Chara_LarvalStalker.c particle.c
+SCHOOL_OBJECTS := $(addprefix $(GAME_BUILD)/map1_s00/,$(SCHOOL_SOURCES:.c=.o)) $(GAME_BUILD)/map1_s00/extracted.o
+MAP_OBJECTS += $(GAME_BUILD)/map0_s02.native.o $(GAME_BUILD)/map1_s00.native.o
+GAME_OBJECTS := $(addprefix $(GAME_BUILD)/,$(GAME_SOURCES:.c=.o)) \
+ $(GAME_BUILD)/b_konami.o $(GAME_BUILD)/stream.o $(GAME_BUILD)/saveload.o $(GAME_BUILD)/credits.o $(GAME_BUILD)/retail_main.o
+CORE_OBJECTS := $(addprefix $(GAME_BUILD)/,$(ENGINE_OBJECTS))
+SDK_OBJECTS := $(addprefix $(GAME_BUILD)/,main_game.o game_cpu_audit.o game_audio_ndsp.o game_xa_thread.o game_texture_cache.o game_texture_decode.o render_3ds.o psx_disc.o sh_disc.o psx_vram.o psx_tim.o stage4_report.o foundation.shbin.o)
+SDK_OBJECTS += $(addprefix $(GAME_BUILD)/,game_cpu_recorder.o stage11a_perf.o stage11a_lifetime.o stage11a_alloc.o stage11a_pitch_trace.o)
+BRIDGE_OBJECTS := $(addprefix $(GAME_BUILD)/,game_native.o game_gpu.o game_controls.o game_services.o game_gs.o game_gte_helpers.o math_impl.o game_data.o game_map.o game_lower.o cheryl_anim_info.o cybil_anim_info.o groaner_anim_infos.o as_rodata_reformat.o game_profile.o game_io.o game_tmd.o game_card.o game_card_image.o school_anim_relocate.o)
+AUDIO_OBJECTS := $(addprefix $(GAME_BUILD)/,game_audio_cd.o game_audio_alias.o game_spu.o game_xa.o xa_decode.o PsyX_XAStream.o sd_call.o smf_main.o smf_io.o smf_mid.o smf_snd.o PsyX_SPUCore.o PsyX_SPUReverb.o)
+include school_sources.mk
+include post_school_sources.mk
+include alchemilla_sources.mk
+include block3_sources.mk
+include sewer1_sources.mk
+include resort_sources.mk
+OFILES := $(SDK_OBJECTS) $(CORE_OBJECTS) $(GAME_OBJECTS) $(MAP_OBJECTS) $(BRIDGE_OBJECTS) $(AUDIO_OBJECTS)
+ENGINE_CFLAGS += -DSH_3DS_GAME=1 -DSH_3DS_LEVEL_B=1 -DSH_PLAYTEST=1
+ENGINE_CXXFLAGS += -DSH_PLAYTEST=1
+DEV_SCENE ?= 0
+ifneq ($(DEV_SCENE),0)
+ifeq ($(filter $(DEV_SCENE),1 2 3 4 5),)
+$(error DEV_SCENE must be 1 Cafe scene, 2 Cafe combat, 3 Cafe cleared, 4 intro outdoor, or 5 MAP2_S00)
+endif
+OUTPUT := $(TOPDIR)/silenthill_stage10_dev
+ENGINE_CFLAGS += -DSH_3DS_DEV_SCENE=$(DEV_SCENE)
+BRIDGE_OBJECTS += $(GAME_BUILD)/game_diagnostics.o
+endif
+CLASSIC_VIEW ?= 0
+ifeq ($(CLASSIC_VIEW),1)
+ENGINE_CFLAGS += -DSH_3DS_CLASSIC=1
+endif
+# PC-style map selection is compiled only into an explicitly separate dev target.
+DEV_START_MAP ?= 0
+ifneq ($(DEV_START_MAP),0)
+ifneq ($(DEV_START_MAP),1)
+$(error DEV_START_MAP supports only the compiled Cafe map 1)
+endif
+OUTPUT := $(TOPDIR)/silenthill_game_dev
+ENGINE_CFLAGS += -DSH_3DS_DEV_START_MAP=$(DEV_START_MAP)
+endif
+SDK_FLAGS := -g -O2 -std=gnu11 -Wall -Wextra -Werror $(ARCH) -mword-relocations \
+ -mno-unaligned-access -ffunction-sections -fdata-sections -D__3DS__ -DSH_3DS_GAME=1 -DSH_PLAYTEST=1 \
+ -I$(TOPDIR)/include -I$(TOPDIR)/build -I$(CTRULIB)/include
+ifeq ($(CLASSIC_VIEW),1)
+SDK_FLAGS += -DSH_3DS_CLASSIC=1
+endif
+ifneq ($(DEV_START_MAP),0)
+SDK_FLAGS += -DSH_3DS_DEV_START_MAP=$(DEV_START_MAP)
+endif
+ifneq ($(DEV_SCENE),0)
+SDK_FLAGS += -DSH_3DS_DEV_SCENE=$(DEV_SCENE)
+endif
+LDFLAGS := -specs=3dsx.specs -g $(ARCH) -Wl,--gc-sections,--no-enum-size-warning,-Map,$(OUTPUT).map,-T,$(TOPDIR)/native_map_data.ld,-T,$(GAME_BUILD)/map0_s01.native.ld,-T,$(GAME_BUILD)/map2_s00.native.ld,-T,$(GAME_BUILD)/map0_s02.native.ld,-T,$(GAME_BUILD)/map1_s00.native.ld
+LDFLAGS += -Wl,--wrap=threadCreate,--wrap=svcCreateThread,--wrap=Gfx_FlashlightUpdate,--wrap=Fs_QueueUpdateRead
+LDFLAGS += -Wl,--wrap=malloc,--wrap=calloc,--wrap=realloc,--wrap=free,--wrap=memalign,--wrap=linearAlloc,--wrap=linearMemAlign,--wrap=linearFree,--wrap=vramAlloc,--wrap=vramAllocAt,--wrap=vramMemAlign,--wrap=vramMemAlignAt,--wrap=vramFree
+LDFLAGS += $(SCHOOL_COMPLETION_LDFLAGS)
+LDFLAGS += $(POST_SCHOOL_LDFLAGS)
+LDFLAGS += $(ALCHEMILLA_LDFLAGS)
+LDFLAGS += $(BLOCK3_LDFLAGS)
+LDFLAGS += $(SEWER1_LDFLAGS)
+LDFLAGS += $(RESORT_LDFLAGS)
+LIBPATHS := -L$(CTRULIB)/lib
+LIBS := -lcitro3d -lctru -lm
+LD := $(CXX)
+APP_TITLE := SH-3DS
+APP_DESCRIPTION := SH-3DS
+APP_AUTHOR := SH-3DS contributors
+_3DSXFLAGS := --smdh=$(OUTPUT).smdh
+.DEFAULT_GOAL := all
+include $(TOPDIR)/Makefile.fmv
+.PHONY: stage10-feedback-probe
+stage10-feedback-probe: $(TOPDIR)/build/stage10_feedback_surface_probe.3dsx
+$(GAME_BUILD)/stage10_feedback_surface_probe.o: tests/stage10_feedback_surface_probe.c include/game_feedback.h
+	$(CC) $(SDK_FLAGS) -MMD -MP -c $< -o $@
+$(TOPDIR)/build/stage10_feedback_surface_probe.elf: $(GAME_BUILD)/stage10_feedback_surface_probe.o $(GAME_BUILD)/render_3ds.o $(GAME_BUILD)/game_texture_decode.o $(GAME_BUILD)/foundation.shbin.o $(GAME_BUILD)/game_profile.o
+	$(CC) -specs=3dsx.specs $(ARCH) -Wl,--gc-sections $^ $(LIBPATHS) $(LIBS) -o $@
+$(TOPDIR)/build/stage10_feedback_surface_probe.3dsx: $(TOPDIR)/build/stage10_feedback_surface_probe.elf
+	3dsxtool $< $@
+.PHONY: stage8-surface-probe
+stage8-surface-probe: $(TOPDIR)/stage8_surface_probe.3dsx
+$(GAME_BUILD)/stage8_surface_probe.o: tests/stage8_surface_probe.c
+	$(CC) $(SDK_FLAGS) -MMD -MP -c $< -o $@
+$(TOPDIR)/stage8_surface_probe.elf: $(GAME_BUILD)/stage8_surface_probe.o $(GAME_BUILD)/render_3ds.o $(GAME_BUILD)/game_texture_decode.o $(GAME_BUILD)/foundation.shbin.o $(GAME_BUILD)/game_profile.o
+	$(CC) -specs=3dsx.specs $(ARCH) -Wl,--gc-sections $^ $(LIBPATHS) $(LIBS) -o $@
+$(TOPDIR)/stage8_surface_probe.3dsx: $(TOPDIR)/stage8_surface_probe.elf
+	3dsxtool $< $@
+.PHONY: stage7-surface-probe
+stage7-surface-probe: $(TOPDIR)/stage7_surface_probe.3dsx
+$(GAME_BUILD)/stage7_surface_probe.o: tests/stage7_surface_probe.c
+	$(CC) $(SDK_FLAGS) -MMD -MP -c $< -o $@
+$(TOPDIR)/stage7_surface_probe.elf: $(GAME_BUILD)/stage7_surface_probe.o $(GAME_BUILD)/render_3ds.o $(GAME_BUILD)/game_texture_decode.o $(GAME_BUILD)/foundation.shbin.o $(GAME_BUILD)/game_profile.o
+	$(CC) -specs=3dsx.specs $(ARCH) -Wl,--gc-sections $^ $(LIBPATHS) $(LIBS) -o $@
+$(TOPDIR)/stage7_surface_probe.3dsx: $(TOPDIR)/stage7_surface_probe.elf
+	3dsxtool $< $@
+.PHONY: psx-probe
+psx-probe: $(TOPDIR)/stage5_render_probe.3dsx
+$(GAME_BUILD)/render_psx_probe.o: tests/render_psx_probe.c
+	$(CC) $(SDK_FLAGS) -MMD -MP -c $< -o $@
+$(TOPDIR)/stage5_render_probe.elf: $(GAME_BUILD)/render_psx_probe.o $(GAME_BUILD)/render_3ds.o $(GAME_BUILD)/game_texture_decode.o $(GAME_BUILD)/psx_vram.o $(GAME_BUILD)/foundation.shbin.o $(GAME_BUILD)/game_profile.o
+	$(CC) -specs=3dsx.specs $(ARCH) -Wl,--gc-sections $^ $(LIBPATHS) $(LIBS) -o $@
+$(TOPDIR)/stage5_render_probe.3dsx: $(TOPDIR)/stage5_render_probe.elf
+	3dsxtool $< $@
+.PHONY: all prepare
+.PHONY: raster-probe
+raster-probe: $(TOPDIR)/stage5_raster_probe.3dsx
+$(GAME_BUILD)/raster_probe.o: tests/raster_probe.c include/game_screen.h
+	$(CC) $(SDK_FLAGS) -MMD -MP -c $< -o $@
+$(TOPDIR)/stage5_raster_probe.elf: $(GAME_BUILD)/raster_probe.o $(GAME_BUILD)/render_3ds.o $(GAME_BUILD)/game_texture_decode.o $(GAME_BUILD)/foundation.shbin.o $(GAME_BUILD)/game_profile.o
+	$(CC) -specs=3dsx.specs $(ARCH) -Wl,--gc-sections $^ $(LIBPATHS) $(LIBS) -o $@
+$(TOPDIR)/stage5_raster_probe.3dsx: $(TOPDIR)/stage5_raster_probe.elf
+	3dsxtool $< $@
+all: prepare
+	@$(MAKE) -f Makefile.game link
+prepare:
+	@$(MAKE) build/psycross/.prepared build-identity
+	@python3 tools/prepare_audio.py
+	@mkdir -p $(GAME_BUILD)
+	@python3 tools/extract_native_items.py
+	@python3 tools/prepare_tmd_emit.py
+	@printf '%s\n' '$(ENGINE_CFLAGS)' '$(SDK_FLAGS)' '$(LDFLAGS)' > $(GAME_BUILD)/flags.tmp
+	@cmp -s $(GAME_BUILD)/flags.tmp $(GAME_BUILD)/flags || cp $(GAME_BUILD)/flags.tmp $(GAME_BUILD)/flags
+.PHONY: link
+SH_3DS_DEPLOY ?= $(if $(wildcard tools/after_build_local.py),1,0)
+link: $(OUTPUT).3dsx
+	@if [ "$(SH_3DS_DEPLOY)" = 1 ]; then python3 tools/after_build_local.py "$(OUTPUT).3dsx"; fi
+$(OUTPUT).3dsx: $(OUTPUT).elf $(OUTPUT).smdh
+$(OUTPUT).smdh: Makefile.game
+$(OUTPUT).elf: $(SDK_OBJECTS) $(CORE_OBJECTS) $(GAME_OBJECTS) $(MAP_OBJECTS) $(BRIDGE_OBJECTS) $(AUDIO_OBJECTS) $(FMV_OBJECTS)
+$(OUTPUT).elf: $(TOPDIR)/native_map_data.ld
+$(OUTPUT).elf: $(GAME_BUILD)/map0_s01.native.ld
+$(OUTPUT).elf: $(GAME_BUILD)/map2_s00.native.ld
+$(CORE_OBJECTS) $(GAME_OBJECTS) $(MAP_OBJECTS) $(BRIDGE_OBJECTS): $(GAME_BUILD)/flags build/psycross/.prepared include/engine_profile.h
+$(SDK_OBJECTS): $(GAME_BUILD)/flags
+$(GAME_BUILD)/%.o: ../src/bodyprog/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/credits.o: ../src/screens/credits/credits.c
+	$(CC) $(ENGINE_CFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map0_s00/%.o: ../src/maps/map0_s00/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP0_S00 -DSH_MAP_NAME=map0_s00 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map0_s00/extracted.o: ../pc_port/build_gen/extracted_data/map0_s00_extracted_data.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP0_S00 -DSH_MAP_NAME=map0_s00 -MMD -MP -c $< -o $@
+$(CAFE_OBJECTS): $(GAME_BUILD)/flags build/psycross/.prepared include/engine_profile.h
+$(GAME_BUILD)/map0_s01/%.o: ../src/maps/map0_s01/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP0_S01 -DSH_MAP_NAME=map0_s01 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map0_s01/extracted.o: ../pc_port/build_gen/extracted_data/map0_s01_extracted_data.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP0_S01 -DSH_MAP_NAME=map0_s01 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map0_s01.native.o: $(CAFE_OBJECTS) tools/native_overlay.py ../configs/USA/maps/sym.map0_s01.txt
+	$(LD) -r -nostdlib $(ARCH) $(CAFE_OBJECTS) -o $@
+	python3 tools/native_overlay.py --object $@ --map map0_s01
+$(GAME_BUILD)/map0_s01.native.ld: $(GAME_BUILD)/map0_s01.native.o
+	@test -f $@
+$(TOWN_OBJECTS): $(GAME_BUILD)/flags build/psycross/.prepared include/engine_profile.h
+$(GAME_BUILD)/map2_s00/%.o: ../src/maps/map2_s00/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP2_S00 -DSH_MAP_NAME=map2_s00 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map2_s00/extracted.o: ../pc_port/build_gen/extracted_data/map2_s00_extracted_data.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP2_S00 -DSH_MAP_NAME=map2_s00 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map2_s00.native.o: $(TOWN_OBJECTS) tools/native_overlay.py ../configs/USA/maps/sym.map2_s00.txt
+	$(LD) -r -nostdlib $(ARCH) $(TOWN_OBJECTS) -o $@
+	python3 tools/native_overlay.py --object $@ --map map2_s00
+$(GAME_BUILD)/map2_s00.native.ld: $(GAME_BUILD)/map2_s00.native.o
+	@test -f $@
+$(HOUSE_OBJECTS): $(GAME_BUILD)/flags build/psycross/.prepared include/engine_profile.h
+$(GAME_BUILD)/map0_s02/%.o: ../src/maps/map0_s02/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP0_S02 -DSH_MAP_NAME=map0_s02 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map0_s02/extracted.o: ../pc_port/build_gen/extracted_data/map0_s02_extracted_data.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP0_S02 -DSH_MAP_NAME=map0_s02 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map0_s02.native.o: $(HOUSE_OBJECTS) tools/native_overlay.py ../configs/USA/maps/sym.map0_s02.txt
+	$(LD) -r -nostdlib $(ARCH) $(HOUSE_OBJECTS) -o $@
+	python3 tools/native_overlay.py --object $@ --map map0_s02
+$(GAME_BUILD)/map0_s02.native.ld: $(GAME_BUILD)/map0_s02.native.o
+	@test -f $@
+$(SCHOOL_OBJECTS): $(GAME_BUILD)/flags build/psycross/.prepared include/engine_profile.h
+$(GAME_BUILD)/map1_s00/%.o: ../src/maps/map1_s00/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP1_S00 -DSH_MAP_NAME=map1_s00 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map1_s00/extracted.o: ../pc_port/build_gen/extracted_data/map1_s00_extracted_data.c
+	@mkdir -p $(dir $@)
+	$(CC) $(ENGINE_CFLAGS) -DMAP1_S00 -DSH_MAP_NAME=map1_s00 -MMD -MP -c $< -o $@
+$(GAME_BUILD)/map1_s00.native.o: $(SCHOOL_OBJECTS) tools/native_overlay.py ../configs/USA/maps/sym.map1_s00.txt
+	$(LD) -r -nostdlib $(ARCH) $(SCHOOL_OBJECTS) -o $@
+	python3 tools/native_overlay.py --object $@ --map map1_s00
+$(GAME_BUILD)/map1_s00.native.ld: $(GAME_BUILD)/map1_s00.native.o
+	@test -f $@
+$(GAME_BUILD)/b_konami.o: ../src/screens/b_konami/b_konami.c
+	$(CC) $(ENGINE_CFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/stream.o: ../src/screens/stream/stream.c
+	$(CC) $(ENGINE_CFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/saveload.o: ../src/screens/saveload/saveload.c
+	$(CC) $(ENGINE_CFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/retail_main.o: ../src/main/main.c
+	$(CC) $(ENGINE_CFLAGS) -Dmain=Game3ds_RetailMain -MMD -MP -c $< -o $@
+$(SDK_OBJECTS): CFLAGS = $(SDK_FLAGS)
+$(CORE_OBJECTS) $(BRIDGE_OBJECTS): CFLAGS = $(ENGINE_CFLAGS)
+$(AUDIO_OBJECTS): $(GAME_BUILD)/flags
+$(AUDIO_OBJECTS): CFLAGS = $(ENGINE_CFLAGS) -Wno-missing-braces -I$(TOPDIR)/build/audio
+$(GAME_BUILD)/sound/sound_data.o: CFLAGS = $(ENGINE_CFLAGS) -Wno-missing-braces
+$(GAME_BUILD)/game_spu.o $(GAME_BUILD)/game_xa.o $(GAME_BUILD)/PsyX_XAStream.o $(GAME_BUILD)/PsyX_SPUCore.o $(GAME_BUILD)/PsyX_SPUReverb.o: CXXFLAGS = $(ENGINE_CXXFLAGS) -I$(TOPDIR)/build/audio -I$(TOPDIR)/../pc_port/PsyCross/src/audio
+$(GAME_BUILD)/PsyX_GTE.o: CXXFLAGS = $(ENGINE_CXXFLAGS) -DSH_3DS_GAME=1
+$(GAME_BUILD)/PsyX_SPUCore.o: CXXFLAGS += -DSH_3DS_GAME=1
+$(GAME_BUILD)/PsyX_SPUCore.o: Makefile.game
+STAGE11A_DEFINES := -DSH_STAGE11A=1 -DSH_STAGE11A_LIFETIME=1 -DSH_CPU_AUDIT_RECORDER=1 -DSH_STAGE11A_SPU_DETAIL=0 -DSH_STAGE11A_TRACEFIX=1 -DSH_STAGE11A_F1_DEFAULT=1 -DSH_STAGE11A_CPU=1
+STAGE11A_SDK := main_game game_cpu_audit game_cpu_recorder game_audio_ndsp game_xa_thread stage11a_perf stage11a_lifetime stage11a_alloc game_texture_cache game_texture_decode render_3ds
+STAGE11A_ENGINE := game_native game_profile stage4_fs game_io game_spu game_xa game_gpu stage11a_pitch_trace
+$(addprefix $(GAME_BUILD)/,$(addsuffix .o,$(STAGE11A_SDK))): CFLAGS += $(STAGE11A_DEFINES)
+$(addprefix $(GAME_BUILD)/,$(addsuffix .o,$(STAGE11A_ENGINE))): CFLAGS += $(STAGE11A_DEFINES)
+$(addprefix $(GAME_BUILD)/,$(addsuffix .o,$(STAGE11A_SDK) $(STAGE11A_ENGINE))) $(GAME_BUILD)/PsyX_SPUCore.o $(GAME_BUILD)/PsyX_GTE.o $(GAME_BUILD)/smf_io.o: Makefile.game
+$(GAME_BUILD)/stage11a_pitch_trace.o: CFLAGS = $(ENGINE_CFLAGS) $(STAGE11A_DEFINES)
+$(GAME_BUILD)/game_audio_ndsp.o: CFLAGS += -DSH_STAGE11A_SPU_CORE=2
+$(GAME_BUILD)/game_spu.o $(GAME_BUILD)/game_xa.o $(GAME_BUILD)/PsyX_SPUCore.o $(GAME_BUILD)/PsyX_GTE.o: CXXFLAGS += $(STAGE11A_DEFINES) -I$(TOPDIR)/stage11a_b -I$(TOPDIR)/build/psycross/src/gte
+$(GAME_BUILD)/PsyX_SPUCore.o: stage11a_b/PsyX_SPUCore.cpp stage11a_b/PsyX_SPUCore.h
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/PsyX_GTE.o: stage11a_b/PsyX_GTE.cpp
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/smf_io.o: stage11a_b/smf_io.c
+	$(CC) $(CFLAGS) $(STAGE11A_DEFINES) -MMD -MP -c $< -o $@
+VPATH := source build/audio ../pc_port/PsyCross/src/audio ../pc_port/src ../src/main build/psycross/src/gte build/psycross/src/psx shaders
+$(GAME_BUILD)/%.o: %.c
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/render_3ds.o: build/foundation_shbin.h
+$(GAME_BUILD)/main_game.o: build/build_identity.h
+build/foundation.shbin: shaders/foundation.v.pica
+	@mkdir -p build
+	picasso -o $@ $<
+build/foundation.shbin.o build/foundation_shbin.h &: build/foundation.shbin
+	cd build && bin2s -a 4 -H foundation_shbin.h foundation.shbin > foundation_shbin.s
+	$(CC) -x assembler-with-cpp -c build/foundation_shbin.s -o build/foundation.shbin.o
+$(GAME_BUILD)/foundation.shbin.o: build/foundation.shbin.o
+	cp $< $@
+-include $(shell find $(GAME_BUILD) -name '*.d' 2>/dev/null)
+

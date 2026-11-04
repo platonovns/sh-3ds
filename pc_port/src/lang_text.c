@@ -1,0 +1,2744 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+#include "lang_text.h"
+#include "lang_zh.h"        /* Chinese text pack for NTSC-J */
+
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#ifndef _WIN32
+#define _strdup(s) strdup(s)
+#endif
+
+#include "game.h"
+#include "bodyprog/bodyprog.h" /* g_Font16AtlasImg (FONT16 re-queue on live switch) */
+#include "bodyprog/map/map.h" /* s_MapOverlayHdr, g_pMapOverlayHeader, e_MapIdx */
+#include "bodyprog/text/text_draw.h" /* MAP_MSG_CODE_PAGE */
+#include "font_region.h"      /* g_FontLayout, Font_SetGlyphWidths (fan-patch kerning) */
+#include "lang_pack.h"        /* PC-side language packs (gamedata/lang) */
+#include "lang_ru.h"          /* Russian fan-patch detection + menu text */
+#include "pc_kanji.h"         /* Pc_KanjiSetChinese (NTSC-J glyph set) */
+#include "lang_jpn.h"         /* NTSC-J menu text from the disc overlays */
+#include "main/fsqueue.h"     /* Fs_QueueStartReadTim, FS_BUFFER_1 */
+#include "main/fileinfo.h"    /* g_GameRegion, Fs_EurFileLookup */
+#include "pc_config.h"
+#include "sh_log.h"
+
+extern const char* PcPort_GetGameDiscPath(void);
+
+/* Disc layout facts (all probe-verified against SLES-01514):
+ * ITEM_<lang>.BIN: 4-byte zero prefix + 195 {namePtr,descPtr} pairs + string
+ * pool, pointers linked for base 0x800C8B68 (fileOffset = ptr - base).
+ * Map overlays: u32 at FILE offset 0x34 points at the message pointer array;
+ * EUR overlays are linked for base 0x800CB370 (fileOffset = ptr - base). */
+#define ITEM_TEXT_BASE  0x800C8B68u
+#define ITEM_TEXT_COUNT 195
+#define EUR_OVL_BASE    0x800CB370u
+#define JPN_OVL_BASE    0x800CBBD0u /* JAP Rev 1/2 map-overlay link base (probe-verified) */
+#define USA_OVL_BASE    0x800C9578u /* US map-overlay link base (configs/USA/maps vram) */
+
+/* Fan-translation (modified USA disc) support. Patches like the Spanish
+ * fandub edit the US disc in place: story text in the VIN overlays, item
+ * names/descriptions + the FONT16 kerning table inside the encrypted
+ * BODYPROG.BIN, accent glyphs repainted over rarely-used FONT16 cells. The
+ * XA voice dub and every TIM stream from the disc already; text is the only
+ * thing the port compiles in, so it is re-read from the disc and installed
+ * whenever it differs from the compiled originals (a matching decompile —
+ * compiled text == vanilla disc text, so vanilla discs are a guaranteed
+ * no-op). Addresses from configs/USA/sym.bodyprog.txt / bodyprog.yaml. */
+#define USA_BODY_VRAM      0x80024B60u
+#define USA_ITEM_NAME_ADDR 0x800ADB60u /* INVENTORY_ITEM_NAMES, 195 ptrs */
+#define USA_ITEM_DESC_ADDR 0x800ADE6Cu /* g_ItemDescriptions, 195 ptrs */
+#define USA_WIDTHS_ADDR    0x80025D6Cu /* FONT_12X16_GLYPH_WIDTHS, 84 bytes */
+
+/* Same idea one region over. A PAL fan patch (consolgames.ru) repaints the
+ * 126-cell EUR atlas with Cyrillic and retunes the kerning table to match — 52
+ * of the 120 advances differ from retail — so rendering it with the compiled
+ * retail widths mis-spaces every line of text on the disc, subtitles included.
+ * Addresses from configs/EUR/bodyprog.yaml; the widths sit at the same file
+ * offset as the US table by coincidence, not by construction. */
+#define EUR_BODY_VRAM      0x80025690u
+#define EUR_WIDTHS_ADDR    0x8002689Cu /* FONT_12X16_GLYPH_WIDTHS, 120 bytes */
+
+/* And once more for NTSC-J, where the Chinese fan translation lives. Its item
+ * names and descriptions are rewritten in BODYPROG exactly like a USA fan
+ * patch's are, so the same adopt-when-it-differs read applies — on a stock JP
+ * disc the compiled tables and the disc agree (matching decompile) and nothing
+ * happens. Addresses from configs/JAP1/sym.bodyprog.txt; the load base is the
+ * same 0x80024B60 the US overlay uses. */
+#define JPN_BODY_VRAM      0x80024B60u
+#define JPN_ITEM_NAME_ADDR 0x800B0044u /* INVENTORY_ITEM_NAMES, 195 ptrs */
+#define JPN_ITEM_DESC_ADDR 0x800B0350u /* g_ItemDescriptions, 195 ptrs */
+#define JPN_WIDTHS_ADDR    0x80025D64u /* FONT_12X16_GLYPH_WIDTHS, 84 bytes */
+/* Must cover the largest per-map message table: MAP7_S02 has 159 US entries.
+ * (Was 96 — the replaced pointer array under-covered MAP4_S01/MAP7_S01/
+ * MAP7_S02 on PAL, sending reads past it.) */
+#define MSG_COUNT_MAX   176
+#define MSG_PARTS_MAX   8 /* largest s_MsgSplits `parts` is 3 */
+
+#define RAW_SECTOR_SIZE 2352
+#define SECTOR_DATA_OFF 24
+#define SECTOR_DATA_LEN 2048
+
+static const char* s_ItemBinNames[LANG_PACK_FIRST] = { "ITEM_ENG", "ITEM_GER", "ITEM_FRN",
+                                                       "ITEM_SPN", "ITEM_ITL", "ITEM_ENG" };
+
+/* The compiled item tables a disc's own text is compared against. */
+extern const char* INVENTORY_ITEM_NAMES[];
+extern const char* g_ItemDescriptions[];
+
+/* Language ids in options-menu order. 0-4 are the PAL disc's own languages;
+ * from LANG_PACK_FIRST on they are PC-side packs (gamedata/lang/<id>.lang),
+ * which exist on no disc and so are offered on EUR only -- the US font has no
+ * accent cells to build their letters into. */
+const char* const s_LangIds[LANG_PACK_FIRST] = { "en", "de", "fr", "es", "it", "en_us" };
+
+/* The Language row's list, built for THIS disc.
+ *
+ * A slot is a position on the row; the value it selects is a config language
+ * id. The two are no longer the same number, because what a disc can offer
+ * varies: only a PAL disc carries German, French, Spanish and Italian itself,
+ * so on any other disc those four ids select nothing and must not appear --
+ * while the packs of the same name, which DO work there, must. On a PAL disc
+ * it is the other way round: the disc's own text wins and the duplicate packs
+ * are hidden.
+ *
+ * A pack that builds letterforms into the PAL atlas (Polish, Russian) still
+ * needs that atlas. A Shift-JIS pack rasterizes its own glyphs and a plain
+ * Latin pack degrades its accents, so both are offered anywhere. */
+#define LANG_SLOT_MAX 32
+
+/* A Japanese disc's own three choices keep their own config key rather than
+ * joining the language ids, and the row carries them as sentinels: slot value
+ * SLOT_JP_FIRST - n selects jpLanguage n.
+ *
+ * They are not interchangeable with a pack, which is why they stay separate.
+ * Switching among them only picks a glyph set, so it is legal in-game and
+ * re-patches the loaded map in place; selecting a pack rebinds the file table
+ * and reloads item text, which the loaded map cannot survive. Keeping the key
+ * also keeps every existing jp_language setting working untouched, and keeps
+ * Japanese as that disc's default rather than making the default depend on
+ * which disc is mounted. */
+#define SLOT_JP_FIRST (-1)
+#define SlotIsJp(v)   ((v) <= SLOT_JP_FIRST)
+#define SlotJpLang(v) (SLOT_JP_FIRST - (v))
+
+static short s_SlotLang[LANG_SLOT_MAX];
+static int   s_SlotCount = -1;
+static int   s_SlotBuiltAtTitle;
+
+/* Packs are only selectable from the title screen: a pack switch rebinds the
+ * file table and reloads item text, which the loaded map cannot survive. On a
+ * Japanese disc the row is also live in-game, for the disc's own three, so the
+ * list has to be built for where it is being used -- otherwise in-game it
+ * would offer a switch that strands the map. The pack already in use stays on
+ * the list either way, so the row can still show what is loaded. */
+static int SlotsOfferPacks(void)
+{
+    /* Off a PAL disc nothing is rebound: Fs_ApplyLanguageRedirects is PAL only,
+     * item text is looked up per draw, and the loaded map's story text is
+     * re-installed in place (LangRepatchLoadedMap). */
+    return g_GameWork.gameStatePrev == GameState_MainMenu || g_GameRegion != Region_EUR;
+}
+
+static int PackOfferedHere(int packIdx)
+{
+    const char* code = Pc_LangPackListCode(packIdx);
+    int         font = Pc_LangPackListFont(packIdx);
+    int         i;
+
+    /* The compiled US script is on every disc already (slot 0 off PAL, id
+     * LANG_EN_US on it), so a pack of it would only be a second US English. */
+    if (strcmp(code, "en") == 0 || strcmp(code, "en_us") == 0)
+        return 0;
+
+    if (g_GameRegion == Region_EUR)
+    {
+        for (i = 1; i < LANG_PACK_FIRST; i++)
+        {
+            if (strcmp(code, s_LangIds[i]) == 0)
+                return 0; /* the disc carries this one natively */
+        }
+        /* And slot 0 on a PAL disc already IS the PAL English script. */
+        return strcmp(code, "en_pal") != 0;
+    }
+    /* Slot 0 on a Japanese disc already IS Japanese, straight from the disc --
+     * the better source, since ja.lang was extracted from it. */
+    if (g_GameRegion == Region_JPN &&
+        (strcmp(code, "ja") == 0 || strcmp(code, "zh") == 0))
+        return 0;
+
+    if (!g_PcConfig.crossRegionLanguages)
+    {
+        /* Without the imported atlas only a Shift-JIS pack, which rasterizes
+         * its own glyphs, can draw correctly off a PAL disc. */
+        return font == LANG_PACK_FONT_SJIS || font == LANG_PACK_FONT_CHINESE;
+    }
+
+    /* The Latin packs draw base letters where the PAL cell grid is not
+     * readable and stay legible. A Cyrillic one has no base letters to fall
+     * back to, and Pc_LangInit refuses it -- so offering it here would only
+     * let the row select something that silently turns back into English.
+     * Hidden instead, so what is on the row is what you can actually get. */
+    if (font == LANG_PACK_FONT_CYRILLIC && !Font_EurGridBacked())
+        return 0;
+
+    return 1;
+}
+
+static void SlotsBuild(void)
+{
+    int n = Pc_LangPackListCount();
+    int i;
+
+    s_SlotCount = 0;
+
+    /* What the gate is actually about is discs that need the PAL glyph atlas
+     * IMPORTED: that moves FONT16 to another VRAM home, which costs a hi-res
+     * font pack its override. A PAL disc already HAS that atlas, so every
+     * Latin, Polish and Cyrillic pack draws correctly there with nothing moved
+     * -- including an installed custom one. It gets the full list either way,
+     * and only a US or Japanese disc is held back. */
+    if (!g_PcConfig.crossRegionLanguages && g_GameRegion != Region_EUR)
+    {
+        int k;
+
+        if (g_GameRegion == Region_JPN)
+        {
+            for (k = 0; k < JP_LANG_COUNT; k++)
+                s_SlotLang[s_SlotCount++] = (short)(SLOT_JP_FIRST - k);
+        }
+        else
+        {
+            s_SlotLang[s_SlotCount++] = 0;
+        }
+        return;
+    }
+
+    if (g_GameRegion == Region_JPN)
+    {
+        /* Japanese, Chinese, English -- the disc's own, first and in order. */
+        for (i = 0; i < JP_LANG_COUNT && s_SlotCount < LANG_SLOT_MAX; i++)
+            s_SlotLang[s_SlotCount++] = (short)(SLOT_JP_FIRST - i);
+    }
+    else
+    {
+        s_SlotLang[s_SlotCount++] = 0; /* the compiled text, or the disc's own */
+
+        if (g_GameRegion == Region_EUR)
+        {
+            for (i = 1; i < LANG_PACK_FIRST && s_SlotCount < LANG_SLOT_MAX; i++)
+                s_SlotLang[s_SlotCount++] = (short)i;
+        }
+    }
+
+    s_SlotBuiltAtTitle = SlotsOfferPacks();
+
+    for (i = 0; i < n && s_SlotCount < LANG_SLOT_MAX; i++)
+    {
+        if (!PackOfferedHere(i))
+            continue;
+        if (!s_SlotBuiltAtTitle && (LANG_PACK_FIRST + i) != g_PcConfig.language)
+            continue;
+
+        s_SlotLang[s_SlotCount++] = (short)(LANG_PACK_FIRST + i);
+    }
+}
+
+static void SlotsLog(void);
+
+static void SlotsEnsure(void)
+{
+    if (s_SlotCount < 0 || s_SlotBuiltAtTitle != SlotsOfferPacks())
+    {
+        SlotsBuild();
+        SlotsLog();
+    }
+}
+
+/* What the Language row ended up offering, and why.
+ *
+ * The scan's own count logs during config parsing, before the log file is
+ * open, so it has never been visible in a report -- which is exactly the
+ * question that kept coming up ("why are only some languages listed?"). This
+ * runs when the list is built, at the title screen, where it is. Once per
+ * rebuild, not per frame. */
+static void SlotsLog(void)
+{
+    char line[256];
+    int  n = 0;
+    int  i;
+
+    for (i = 0; i < s_SlotCount && n < (int)sizeof(line) - 24; i++)
+    {
+        int lang = s_SlotLang[i];
+
+        n += snprintf(line + n, sizeof(line) - n, "%s%s", i ? ", " : "",
+                      SlotIsJp(lang) ? "<disc>" : Pc_LangIdForSlot(lang));
+    }
+    SH_LOG("[LANG] row: %d slot(s) from %d installed pack(s)%s [%s]",
+           s_SlotCount, Pc_LangPackListCount(),
+           g_PcConfig.crossRegionLanguages ? ", cross-region ON" : "", line);
+}
+
+static int SlotsCount(void)
+{
+    SlotsEnsure();
+    return s_SlotCount;
+}
+
+static int SlotLang(int slot)
+{
+    SlotsEnsure();
+    return (slot >= 0 && slot < s_SlotCount) ? s_SlotLang[slot] : 0;
+}
+
+/* Row position of the language in use, for the menu's starting highlight. */
+static int SlotOfLang(int lang)
+{
+    int i;
+
+    for (i = 0; i < SlotsCount(); i++)
+    {
+        if (s_SlotLang[i] == lang)
+            return i;
+    }
+    return 0;
+}
+
+void Pc_LangPacksRescan(void)
+{
+    Pc_LangPackListRescan();
+    s_SlotCount = -1;
+}
+
+/* Is the text on screen Shift-JIS? True on a Japanese disc showing Japanese or
+ * Chinese, and true for a `!font=sjis` pack on ANY disc -- the kanji glyphs are
+ * embedded in the port and rasterized into framebuffer cells, so they never
+ * needed the Japanese disc. */
+int Pc_LangSjisActive(void)
+{
+    if (g_GameRegion == Region_JPN)
+        return g_PcConfig.jpLanguage != JP_LANG_ENGLISH;
+
+    return Pc_LangPackActive() && LangPackFontIsKanji(Pc_LangPackFont());
+}
+
+/* A saved language CODE -> the id that code means ON THIS DISC.
+ *
+ * The config stores the code precisely so installing or removing a pack cannot
+ * move anybody's language, but the code alone does not say which id: "de" is
+ * the disc's own German on a PAL disc and the de PACK anywhere else. Resolving
+ * it in the config parser, which runs before the region is known, picked the
+ * PAL id every time -- so on a US disc the saved language resolved to an id
+ * that disc has no slot for and every boot came up English. */
+int Pc_LangIdFromCode(const char* code)
+{
+    int n;
+    int i;
+
+    /* "auto" is the default and means "whatever this disc is": id 0 is already
+     * region-relative -- US English on a USA disc, PAL English on a PAL one --
+     * and an NTSC-J disc takes its text from jpLanguage, which defaults to
+     * Japanese. So the three automatic outcomes need no special cases, only a
+     * spelling that resolves here instead of being hunted for in the registry. */
+    if (code == NULL || code[0] == '\0' ||
+        strcmp(code, "auto") == 0 || strcmp(code, "en") == 0)
+        return 0;
+    if (strcmp(code, "en_us") == 0)
+    {
+        /* Off a PAL disc, slot 0 already IS the compiled US script, and the
+         * separate id has no row of its own there. */
+        return (g_GameRegion == Region_EUR) ? LANG_EN_US : 0;
+    }
+    /* Slot 0 on a PAL disc already IS the PAL script, and on a Japanese disc
+     * it is Japanese and Chinese by way of jpLanguage; loading the pack of
+     * the same name over the disc's own text is never what was meant. */
+    if (g_GameRegion == Region_EUR && strcmp(code, "en_pal") == 0)
+        return 0;
+    if (g_GameRegion == Region_JPN && (strcmp(code, "ja") == 0 || strcmp(code, "zh") == 0))
+        return 0;
+
+    /* The disc's own four, only where the disc actually carries them. */
+    if (g_GameRegion == Region_EUR)
+    {
+        for (i = 1; i < LANG_PACK_FIRST; i++)
+        {
+            if (i != LANG_EN_US && strcmp(code, s_LangIds[i]) == 0)
+                return i;
+        }
+    }
+
+    n = Pc_LangPackListCount();
+    for (i = 0; i < n; i++)
+    {
+        if (strcmp(code, Pc_LangPackListCode(i)) == 0)
+            return LANG_PACK_FIRST + i;
+    }
+    SH_WARN("[LANG] no language '%s' on this disc or in gamedata/lang - using the disc's own", code);
+    return 0;
+}
+
+const char* Pc_LangIdForSlot(int lang)
+{
+    if (lang >= LANG_PACK_FIRST)
+    {
+        const char* code = Pc_LangPackListCode(lang - LANG_PACK_FIRST);
+
+        return (code[0] != '\0') ? code : "en";
+    }
+    return (lang > 0 && lang < LANG_PACK_FIRST) ? s_LangIds[lang] : "en";
+}
+
+static char*       s_ItemPool;
+
+/* What the last map install actually achieved, for the LANGCHECK console
+ * command. Shipping a language means "every layer of it arrived", and the
+ * layers fail independently -- a US disc was once translating the menus and
+ * the inventory while leaving every story line English. Reading it back beats
+ * hunting for an untranslated line in-game. */
+static int s_StatMapIdx   = -1;
+static int s_StatSrcCount;
+static int s_StatPackMsgs;
+/* "item text has been installed" sentinel. Was s_ItemPool != NULL, but the
+ * NTSC-J path installs pointers to COMPILED tables and allocates no pool, so
+ * the pool alone would report the Japanese text as absent. */
+static int         s_ItemTextReady;
+static const char* s_ItemNames[ITEM_TEXT_COUNT];
+static const char* s_ItemDescs[ITEM_TEXT_COUNT];
+
+static char*           s_MsgPool;
+static const char*     s_MsgPtrs[MSG_COUNT_MAX];
+static s_MapOverlayHdr s_LangMapHeader;
+static s_MapOverlayHdr s_ModMapHeader;
+static s_MapOverlayHdr* s_PristineMapHeader;
+
+/* PAL split-page exceptions: a few messages one US entry wide are split into
+ * several sequential pages in some languages (probe-verified indices; US
+ * index space, langs 1=de 2=fr 3=es 4=it). Parts are joined with ~N so the
+ * compiled map code's US indices still resolve; a join too tall for one
+ * rendered page keeps the disc's own page breaks instead (~P — see the join
+ * loop). Before that, an over-cap message could not be dismissed at all. */
+typedef struct {
+    unsigned char mapIdx;
+    unsigned char lang;
+    unsigned char usIdx;
+    unsigned char parts;
+} s_LangMsgSplit;
+
+static const s_LangMsgSplit s_MsgSplits[] = {
+    { MapIdx_MAP1_S01, 1, 23, 2 }, /* DE: piano poem title + page 1 */
+    { MapIdx_MAP1_S01, 2, 23, 2 }, /* FR: same */
+    { MapIdx_MAP1_S01, 4, 23, 3 }, /* IT: poem page 1 in three parts */
+    { MapIdx_MAP1_S01, 4, 24, 2 }, /* IT: poem page 2 */
+    { MapIdx_MAP1_S01, 4, 25, 2 }, /* IT: poem page 3 */
+    { MapIdx_MAP1_S03, 3, 22, 2 }, /* ES: poltergeist note */
+    { MapIdx_MAP5_S02, 4, 43, 2 }, /* IT: Norman's delivery note */
+};
+
+/* NTSC-J: US->JAP message index mapping for the maps whose tables differ. */
+#include "lang_jpn_msgmap.inc"
+
+/* NTSC-J inventory text. The decomp carries the Japanese tables but selects them
+ * with VERSION_REGION_IS(NTSCJ) at COMPILE time; the port builds one binary and
+ * picks the region at runtime, so they are compiled alongside the English ones
+ * and installed for Region_JPN below. */
+#include "lang_jpn_items.inc"
+
+int Pc_LangActive(void)
+{
+    /* Any language INCLUDING English: PAL-EN is its own retranslation
+     * ("Take them?" vs the US "Take_it?"), so a PAL disc always shows its
+     * own text rather than the compiled US strings -- unless NTSC-U English is
+     * what was asked for, which is precisely those compiled strings. */
+    return g_GameRegion == Region_EUR && g_PcConfig.language != LANG_EN_US;
+}
+
+static int s_FanTextActive;
+
+/* Set once the disc's item text is recognised as the Chinese patch. Until then
+ * nothing may claim this disc can render Chinese. */
+static int s_JpnDiscIsChinese;
+
+/* Set when zh.pack is supplying the words instead. Read by the map-message
+ * installer, which must then take its strings from the pack and not the
+ * overlay — the disc is Japanese in that case. */
+static int s_ZhPackActive;
+
+int Pc_LangZhPackActive(void)
+{
+    return s_ZhPackActive;
+}
+
+int Pc_LangJpnDiscIsChinese(void)
+{
+    return s_JpnDiscIsChinese;
+}
+
+int Pc_FanTextActive(void)
+{
+    return s_FanTextActive;
+}
+
+/* Read a whole file out of the raw-sector disc image. Caller frees. */
+unsigned char* Pc_LangReadDiscFile(unsigned int sector, unsigned int size)
+{
+    const char*    path = PcPort_GetGameDiscPath();
+    FILE*          f;
+    unsigned char* buf;
+    unsigned int   done;
+
+    if (!path || !path[0])
+        return NULL;
+
+    f = fopen(path, "rb");
+    if (!f)
+        return NULL;
+
+    buf = (unsigned char*)malloc(size + SECTOR_DATA_LEN);
+    for (done = 0; done < size; done += SECTOR_DATA_LEN, sector++)
+    {
+        fseek(f, (long)sector * RAW_SECTOR_SIZE + SECTOR_DATA_OFF, SEEK_SET);
+        if (fread(buf + done, 1, SECTOR_DATA_LEN, f) != SECTOR_DATA_LEN)
+        {
+            fclose(f);
+            free(buf);
+            return NULL;
+        }
+    }
+    fclose(f);
+    return buf;
+}
+
+/* Item text uses the US dialect except that PAL localizations write real
+ * spaces; the stock renderer only knows '_'. Accents/newlines pass through
+ * (text_draw handles both). */
+static char* TranslateItemText(char* dst, const unsigned char* src)
+{
+    for (; *src != '\0'; src++)
+    {
+        *dst++ = (*src == ' ') ? '_' : (char)*src;
+    }
+    *dst++ = '\0';
+    return dst;
+}
+
+/* The game's own Fs_DecryptOverlay LCG (1ST/ overlays are XOR-obfuscated on
+ * disc; one continuous keystream over the whole file, per LE u32). */
+static void DecryptOverlay(unsigned char* data, unsigned int size)
+{
+    unsigned int seed = 0;
+    unsigned int i;
+
+    for (i = 0; i + 4 <= size; i += 4)
+    {
+        unsigned int w = data[i] | (data[i + 1] << 8) | (data[i + 2] << 16) | ((unsigned int)data[i + 3] << 24);
+
+        seed = (seed + 0x01309125u) * 0x03A452F7u;
+        w ^= seed;
+        data[i]     = (unsigned char)w;
+        data[i + 1] = (unsigned char)(w >> 8);
+        data[i + 2] = (unsigned char)(w >> 16);
+        data[i + 3] = (unsigned char)(w >> 24);
+    }
+}
+
+/* Parse the {name,desc} pointer arrays at the given BODYPROG file offsets,
+ * resolving pointers against `base`, and install them into s_ItemNames/
+ * s_ItemDescs when they differ from the compiled US text. Both arrays must
+ * parse cleanly before anything is installed. Returns 1 if adopted, 0 if the
+ * text matched the compiled originals (vanilla no-op), -1 on a parse error. */
+static int AdoptItemArrays(const unsigned char* bin, unsigned int size,
+                           unsigned int base, unsigned int nameOff, unsigned int descOff,
+                           const char* const* cmpNames, const char* const* cmpDescs)
+{
+    const char*  fanNames[ITEM_TEXT_COUNT];
+    const char*  fanDescs[ITEM_TEXT_COUNT];
+    unsigned int poolBytes = 0;
+    int          diff      = 0;
+    int          i;
+    char*        out;
+
+    if (nameOff + ITEM_TEXT_COUNT * 4 > size || descOff + ITEM_TEXT_COUNT * 4 > size)
+        return -1;
+
+    for (i = 0; i < ITEM_TEXT_COUNT; i++)
+    {
+        unsigned int nameAddr = *(const unsigned int*)(bin + nameOff + i * 4);
+        unsigned int descAddr = *(const unsigned int*)(bin + descOff + i * 4);
+        const char*  compiled;
+
+        fanNames[i] = NULL;
+        fanDescs[i] = NULL;
+
+        if (nameAddr != 0)
+        {
+            if (nameAddr <= base || nameAddr - base >= size)
+                return -1;
+            fanNames[i] = (const char*)(bin + (nameAddr - base));
+            if (memchr(fanNames[i], '\0', size - (nameAddr - base)) == NULL)
+                return -1;
+            poolBytes += (unsigned int)strlen(fanNames[i]) + 1;
+        }
+        if (descAddr != 0)
+        {
+            if (descAddr <= base || descAddr - base >= size)
+                return -1;
+            fanDescs[i] = (const char*)(bin + (descAddr - base));
+            if (memchr(fanDescs[i], '\0', size - (descAddr - base)) == NULL)
+                return -1;
+            poolBytes += (unsigned int)strlen(fanDescs[i]) + 1;
+        }
+
+        compiled = cmpNames[i];
+        if ((compiled == NULL) != (fanNames[i] == NULL) ||
+            (compiled != NULL && strcmp(compiled, fanNames[i]) != 0))
+        {
+            diff = 1;
+        }
+        compiled = cmpDescs[i];
+        if ((compiled == NULL) != (fanDescs[i] == NULL) ||
+            (compiled != NULL && strcmp(compiled, fanDescs[i]) != 0))
+        {
+            diff = 1;
+        }
+    }
+
+    if (!diff)
+        return 0;
+
+    /* 4MB cap: legitimate item text totals ~20KB — anything bigger is a
+     * malformed disc aiming every pointer at a huge shared string. */
+    if (poolBytes > (1u << 22))
+        return -1;
+    s_ItemPool = (char*)malloc(poolBytes + 1);
+    if (s_ItemPool == NULL)
+        return -1;
+    out = s_ItemPool;
+    s_ItemTextReady = 1;
+    for (i = 0; i < ITEM_TEXT_COUNT; i++)
+    {
+        /* Already US dialect (underscores, \n\t layout) — copy verbatim. */
+        if (fanNames[i] != NULL)
+        {
+            s_ItemNames[i] = out;
+            memcpy(out, fanNames[i], strlen(fanNames[i]) + 1);
+            out += strlen(fanNames[i]) + 1;
+        }
+        else
+        {
+            s_ItemNames[i] = NULL;
+        }
+        if (fanDescs[i] != NULL)
+        {
+            s_ItemDescs[i] = out;
+            memcpy(out, fanDescs[i], strlen(fanDescs[i]) + 1);
+            out += strlen(fanDescs[i]) + 1;
+        }
+        else
+        {
+            s_ItemDescs[i] = NULL;
+        }
+    }
+    return 1;
+}
+
+/* 1 if bin[so..] is a clean single-line item name: printable ASCII, non-empty,
+ * NUL-terminated within maxLen. Says nothing about where the string starts —
+ * see IsNameBoundary. */
+static int IsPlaintextName(const unsigned char* bin, unsigned int size, unsigned int so, unsigned int maxLen)
+{
+    unsigned int j;
+
+    if (so >= size)
+        return 0;
+    for (j = 0; j < maxLen && so + j < size; j++)
+    {
+        unsigned char c = bin[so + j];
+
+        if (c == 0)
+            return j > 0;
+        if (c < 0x20 || c > 0x7e)
+            return 0;
+    }
+    return 0;
+}
+
+/* 1 if the pointer lands on a string boundary (the byte before it is a NUL).
+ * This is what pins the link base: at an off-by-a-few base every name still
+ * reads as printable text but lands mid-string. Counted rather than required
+ * per pointer, because a patch's own pool can legitimately alias — FireCross
+ * dropped the terminator between two item names, so one entry points into the
+ * middle of its neighbour and every other entry is clean. */
+static int IsNameBoundary(const unsigned char* bin, unsigned int so)
+{
+    return so == 0 || bin[so - 1] == 0;
+}
+
+/* Locate a relinked, UNENCRYPTED item-name pointer array in a rebuilt disc's
+ * BODYPROG (Brazilian re-translation). The item set is unchanged from US, so
+ * the array's set/empty slot pattern matches the compiled build exactly, and
+ * every non-empty pointer must resolve to a clean name; nearly all of them must
+ * also start on a string boundary, which is what pins `base` exactly (a base
+ * off by a few bytes still yields printable text, but from mid-string, so the
+ * boundary count collapses). An encrypted vanilla/in-place disc has no such
+ * array in the raw bytes (all of it fails on random data), so this returns 0
+ * for them and the caller decrypts as before. On success, writes the detected
+ * link base and name-array file offset. */
+#define ITEM_BOUNDARY_NUM 15 /* accept at 15/16 clean: see IsNameBoundary */
+#define ITEM_BOUNDARY_DEN 16
+static int BrazilFindItemArray(const unsigned char* bin, unsigned int size,
+                               unsigned int* outBase, unsigned int* outNameOff)
+{
+    unsigned char sig[ITEM_TEXT_COUNT];
+    unsigned int  usNameOff = USA_ITEM_NAME_ADDR - USA_BODY_VRAM;
+    unsigned int  offLo     = (usNameOff > 0x800) ? usNameOff - 0x800 : 0;
+    unsigned int  offHi     = usNameOff + 0x400;
+    unsigned int  base;
+    unsigned int  nameOff;
+    int           i;
+
+    for (i = 0; i < ITEM_TEXT_COUNT; i++)
+        sig[i] = (INVENTORY_ITEM_NAMES[i] != NULL);
+
+    for (base = USA_BODY_VRAM - 0x800; base <= USA_BODY_VRAM + 0x400; base += 4)
+    {
+        for (nameOff = offLo; nameOff <= offHi && nameOff + ITEM_TEXT_COUNT * 4 <= size; nameOff += 4)
+        {
+            int ok       = 1;
+            int setCount = 0;
+            int onBound  = 0;
+
+            for (i = 0; i < ITEM_TEXT_COUNT; i++)
+            {
+                unsigned int p = *(const unsigned int*)(bin + nameOff + i * 4);
+
+                if (!sig[i])
+                {
+                    if (p != 0)
+                    {
+                        ok = 0;
+                        break;
+                    }
+                    continue;
+                }
+                if (p <= base || p - base >= size || !IsPlaintextName(bin, size, p - base, 48))
+                {
+                    ok = 0;
+                    break;
+                }
+                setCount++;
+                onBound += IsNameBoundary(bin, p - base);
+            }
+            if (ok && onBound * ITEM_BOUNDARY_DEN < setCount * ITEM_BOUNDARY_NUM)
+            {
+                ok = 0;
+            }
+            if (ok)
+            {
+                *outBase    = base;
+                *outNameOff = nameOff;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+/* Read BODYPROG.BIN off the active USA disc and adopt its kerning table and
+ * item name/description arrays when they differ from the compiled originals. */
+static void FanTextInit(void)
+{
+    /* Compiled US kerning table, captured before any override so re-runs
+     * (the title-screen Language row re-enters via Pc_LangSetLanguage)
+     * keep comparing against the pristine baseline. */
+    static const unsigned char* s_compiledWidths;
+
+    unsigned int   size = (unsigned int)g_FileTable[FILE_1ST_BODYPROG_BIN].blockCount << 8;
+    unsigned char* bin  = Pc_LangReadDiscFile(g_FileTable[FILE_1ST_BODYPROG_BIN].startSector, size);
+    unsigned int   brBase;
+    unsigned int   brNameOff;
+    int            i;
+
+    if (s_compiledWidths == NULL)
+        s_compiledWidths = g_FontLayout->glyphWidths;
+
+    s_FanTextActive = 0;
+    if (bin == NULL)
+        return;
+
+    /* A rebuilt disc (Brazilian re-translation) does NOT encrypt BODYPROG and
+     * relinks the item pointer arrays to a shifted base. Detect + adopt them
+     * straight from the raw bytes before any decryption — decrypting the
+     * plaintext would corrupt it. Encrypted vanilla/in-place discs have no such
+     * array in the raw bytes, so this fails and the original decrypt path below
+     * runs unchanged. Their VIN map messages stay US-linked either way and
+     * translate through UsaPatchMapMessages. */
+    if (BrazilFindItemArray(bin, size, &brBase, &brNameOff))
+    {
+        int r = AdoptItemArrays(bin, size, brBase, brNameOff, brNameOff + ITEM_TEXT_COUNT * 4,
+                                INVENTORY_ITEM_NAMES, g_ItemDescriptions);
+
+        if (r == 1)
+        {
+            s_FanTextActive = 1;
+            SH_LOG("[FANPATCH] rebuilt-disc item text adopted (base 0x%08X, name off 0x%X)", brBase, brNameOff);
+        }
+        else if (r < 0)
+        {
+            SH_WARN("[FANPATCH] rebuilt-disc item arrays did not parse — keeping compiled item text");
+        }
+        free(bin);
+        return;
+    }
+
+    DecryptOverlay(bin, size);
+
+    /* A fan patch that edits BODYPROG in place (Spanish fandub) keeps the
+     * kerning table and item-pointer arrays at their US symbol offsets. A patch
+     * that REBUILDS BODYPROG but stays encrypted would relocate them, so those
+     * offsets land on unrelated bytes and adopting them explodes every glyph /
+     * installs garbage item names. Real FONT_12X16 advances never exceed the
+     * 16px cell; if the bytes at the US widths offset do, this disc's BODYPROG
+     * is not US-linked — keep every compiled US table. */
+    for (i = 0; i < 84; i++)
+    {
+        if (bin[(USA_WIDTHS_ADDR - USA_BODY_VRAM) + i] > 16)
+        {
+            SH_WARN("[FANPATCH] BODYPROG not US-linked (rebuilt disc) — keeping compiled font/item text");
+            free(bin);
+            return;
+        }
+    }
+
+    if (memcmp(bin + (USA_WIDTHS_ADDR - USA_BODY_VRAM), s_compiledWidths, 84) != 0)
+    {
+        Font_SetGlyphWidths(bin + (USA_WIDTHS_ADDR - USA_BODY_VRAM), 84);
+        s_FanTextActive = 1;
+        SH_LOG("[FANPATCH] modified FONT16 kerning table adopted from disc");
+    }
+
+    switch (AdoptItemArrays(bin, size, USA_BODY_VRAM,
+                            USA_ITEM_NAME_ADDR - USA_BODY_VRAM,
+                            USA_ITEM_DESC_ADDR - USA_BODY_VRAM,
+                            INVENTORY_ITEM_NAMES, g_ItemDescriptions))
+    {
+        case 1:
+            s_FanTextActive = 1;
+            SH_LOG("[FANPATCH] modified item text adopted from disc");
+            break;
+        case -1:
+            SH_WARN("[FANPATCH] BODYPROG item arrays did not parse — keeping compiled item text");
+            break;
+        default:
+            break;
+    }
+
+    free(bin);
+}
+
+/* Adopt a PAL fan patch's retuned FONT16 kerning table. Mirrors the USA branch
+ * of FanTextInit: the widths are only taken when they differ from the compiled
+ * retail table (so a stock EUR disc is a guaranteed no-op) and only when they
+ * are plausible advances for a 16px cell, which is what separates an in-place
+ * patch from a rebuilt BODYPROG whose tables moved. Item and story text need
+ * nothing extra here — both already come off the disc on EUR. */
+static void EurFanFontInit(void)
+{
+    static const unsigned char* s_compiledWidths;
+
+    unsigned int   size = (unsigned int)g_FileTable[FILE_1ST_BODYPROG_BIN].blockCount << 8;
+    unsigned int   off  = EUR_WIDTHS_ADDR - EUR_BODY_VRAM;
+    unsigned char* bin;
+    int            count;
+    int            i;
+
+    if (s_compiledWidths == NULL)
+        s_compiledWidths = g_FontLayout->glyphWidths;
+
+    if (size < off + FONT_ATLAS_CELL_MAX)
+        return;
+
+    bin = Pc_LangReadDiscFile(g_FileTable[FILE_1ST_BODYPROG_BIN].startSector, size);
+    if (bin == NULL)
+        return;
+
+    DecryptOverlay(bin, size);
+
+    /* Real advances never exceed the 16px cell. Garbage here means BODYPROG was
+     * rebuilt and its tables moved, so nothing at this offset can be trusted. */
+    for (i = 0; i < FONT_ATLAS_CELL_MAX; i++)
+    {
+        if (bin[off + i] > 16)
+        {
+            SH_WARN("[FANPATCH] EUR BODYPROG not retail-linked — keeping compiled font widths");
+            free(bin);
+            return;
+        }
+    }
+
+    /* A non-zero advance in one of retail's six blank cells is the disc telling
+     * us it painted glyphs there (consolgames.ru puts ъ ы ь э ю я in them). */
+    count = 120;
+    for (i = 120; i < FONT_ATLAS_CELL_MAX; i++)
+    {
+        if (bin[off + i] != 0)
+        {
+            count = FONT_ATLAS_CELL_MAX;
+            break;
+        }
+    }
+
+    if (count != g_FontLayout->glyphCount ||
+        memcmp(bin + off, s_compiledWidths, 120) != 0)
+    {
+        Font_SetGlyphWidths(bin + off, count);
+        SH_LOG("[FANPATCH] modified EUR FONT16 kerning table adopted from disc (%d glyphs)", count);
+    }
+
+    free(bin);
+}
+
+/* Adopt a fan-translated NTSC-J disc's item text and kerning. Mirrors the USA
+ * branch of FanTextInit against the JP symbol addresses and the compiled JP
+ * tables: the Chinese translation rewrites BODYPROG in place (it keeps the
+ * game's own kuten codes and only redefines the glyphs drawn at them), so the
+ * arrays are still JP-linked and only their strings differ. Map/story text
+ * needs nothing here — that already comes off the disc on NTSC-J. */
+/* Fingerprint of the adopted NTSC-J item text: FNV-1a over item names 0..7,
+ * each NUL-terminated. Measured offline from the discs themselves —
+ *
+ *   0x5FE7A885  retail SLPM-86192 (栄養剤 / 携帯用救急キット / アンプル)
+ *   0xECCF3760  the goro / 十三月 2006 Chinese patch (PPF applied to that disc)
+ *
+ * The Chinese patch does not write Chinese; it writes JIS kuten codes whose
+ * GLYPHS its custom BIOS redefines. Its item names come out as runs like
+ * 0x89B3 0x89B4 0x89B5 — sequential nonsense as Japanese, which is exactly what
+ * makes them a reliable signature. */
+#define JPN_ITEMS_FNV_CHINESE 0xECCF3760u
+
+static unsigned int JpnItemTextFingerprint(void)
+{
+    unsigned int h = 2166136261u;
+    int          i;
+
+    for (i = 0; i < 8; i++)
+    {
+        const char* p = s_ItemNames[i];
+
+        if (p != NULL)
+        {
+            for (; *p != '\0'; p++)
+            {
+                h ^= (unsigned char)*p;
+                h *= 16777619u;
+            }
+        }
+        h ^= 0u;
+        h *= 16777619u;
+    }
+    return h;
+}
+
+/* Returns 1 only if the disc's own item text replaced the compiled tables. */
+static int JpnFanTextInit(void)
+{
+    static const unsigned char* s_compiledWidths;
+
+    unsigned int   size = (unsigned int)g_FileTable[FILE_1ST_BODYPROG_BIN].blockCount << 8;
+    unsigned char* bin;
+    int            i;
+    int            adopted;
+
+    if (s_compiledWidths == NULL)
+        s_compiledWidths = g_FontLayout->glyphWidths;
+
+    if (size < (JPN_ITEM_DESC_ADDR - JPN_BODY_VRAM) + ITEM_TEXT_COUNT * 4)
+        return 0;
+
+    bin = Pc_LangReadDiscFile(g_FileTable[FILE_1ST_BODYPROG_BIN].startSector, size);
+    if (bin == NULL)
+        return 0;
+
+    DecryptOverlay(bin, size);
+
+    /* Real FONT_12X16 advances never exceed the 16px cell; garbage here means
+     * this BODYPROG is not JP-linked and nothing at these offsets is safe. */
+    for (i = 0; i < 84; i++)
+    {
+        if (bin[(JPN_WIDTHS_ADDR - JPN_BODY_VRAM) + i] > 16)
+        {
+            SH_WARN("[FANPATCH] NTSC-J BODYPROG not JP-linked — keeping compiled font/item text");
+            free(bin);
+            return 0;
+        }
+    }
+
+    if (memcmp(bin + (JPN_WIDTHS_ADDR - JPN_BODY_VRAM), s_compiledWidths, 84) != 0)
+    {
+        Font_SetGlyphWidths(bin + (JPN_WIDTHS_ADDR - JPN_BODY_VRAM), 84);
+        SH_LOG("[FANPATCH] modified NTSC-J FONT16 kerning table adopted from disc");
+    }
+
+    adopted = 0;
+    switch (AdoptItemArrays(bin, size, JPN_BODY_VRAM,
+                            JPN_ITEM_NAME_ADDR - JPN_BODY_VRAM,
+                            JPN_ITEM_DESC_ADDR - JPN_BODY_VRAM,
+                            INVENTORY_ITEM_NAMES_JPN, ITEM_DESCRIPTIONS_JPN))
+    {
+        case 1:
+            SH_LOG("[FANPATCH] modified NTSC-J item text adopted from disc");
+            adopted = 1;
+            if (JpnItemTextFingerprint() == JPN_ITEMS_FNV_CHINESE)
+            {
+                /* The disc IS the Chinese release, so turn its glyph set on
+                 * without making the player find the language row: on this disc
+                 * Japanese glyphs would render the same codes as gibberish, so
+                 * Chinese is not a preference here, it is the correct reading. */
+                s_JpnDiscIsChinese = 1;
+                if (!g_PcConfig.jpLanguage)
+                {
+                    g_PcConfig.jpLanguage = 1;
+                    SH_LOG("[LANG] Chinese-patched NTSC-J disc detected — selecting Chinese");
+                }
+            }
+            break;
+        case -1:
+            SH_WARN("[FANPATCH] NTSC-J BODYPROG item arrays did not parse — keeping compiled item text");
+            break;
+        default:
+            break;
+    }
+
+    free(bin);
+    return adopted;
+}
+
+static void LangInitBody(void);
+
+void Pc_LangInit(void)
+{
+    LangInitBody();
+    /* Every exit above leaves the layout and the pack flags final; on a disc
+     * without the PAL grid the override that stands in for it follows them. */
+    Font_HiresGridSync();
+}
+
+static void LangInitBody(void)
+{
+    unsigned int   sector;
+    unsigned int   blocks;
+    unsigned int   size;
+    unsigned char* bin;
+    char*          out;
+    int            i;
+
+    /* Re-entrant: the title-screen options menu re-runs this on a language
+     * switch. Dropping the pool makes Pc_LangItemName/Desc fall back to the
+     * compiled US strings until (unless) a new table loads below -- but only
+     * with the pointers and the ready flag cleared too: US English on a PAL
+     * disc installs nothing, so it drew the freed pool (or a Japanese pack's
+     * tables) left over from the language before it. */
+    free(s_ItemPool);
+    s_ItemPool      = NULL;
+    s_ItemTextReady = 0;
+    memset(s_ItemNames, 0, sizeof(s_ItemNames));
+    memset(s_ItemDescs, 0, sizeof(s_ItemDescs));
+
+    /* Clean slate for the layout logic below: a previous run's fan-patch
+     * override or Polish layout must not survive into this one (see
+     * Font_ResetLayout for the switch-away-and-back fold-up it caused). */
+    Font_ResetLayout();
+
+    /* First run: turn the saved code into this disc's id. The parser could not
+     * -- it runs before the region is known and before the pack registry can
+     * be read -- so until now a saved language only survived a reboot on the
+     * disc whose own numbering happened to match. */
+    {
+        static int resolved;
+
+        if (!resolved)
+        {
+            resolved = 1;
+            if (g_PcConfig.languageCode[0] != '\0')
+                g_PcConfig.language = Pc_LangIdFromCode(g_PcConfig.languageCode);
+
+            /* The file table was redirected at boot while the id was still 0,
+             * so a PAL disc set to a disc language kept the English map
+             * overlays and death hints -- the items alone came out translated.
+             * No-op off PAL. */
+            Fs_ApplyLanguageRedirects();
+
+            /* An NTSC-J disc picks its three own languages by jpLanguage, not
+             * by this id -- id 0 is Japanese, Chinese and English alike. The
+             * launcher writes only `language`, so a code naming one of them
+             * has to reach jpLanguage or "US English" boots into Japanese; a
+             * Latin pack needs English there too, or the Shift-JIS decoder
+             * stays on and eats its accented bytes as lead bytes. "auto"
+             * leaves the in-game row's own choice alone, whose default is
+             * Japanese. Saved as well, so the two keys agree next boot. */
+            if (g_GameRegion == Region_JPN)
+            {
+                const char* c  = g_PcConfig.languageCode;
+                int         jp = -1;
+
+                if (strcmp(c, "en") == 0 || strcmp(c, "en_us") == 0 || strcmp(c, "en_pal") == 0)
+                    jp = JP_LANG_ENGLISH;
+                else if (strcmp(c, "zh") == 0)
+                    jp = JP_LANG_CHINESE;
+                else if (strcmp(c, "ja") == 0)
+                    jp = JP_LANG_JAPANESE;
+                else if (g_PcConfig.language >= LANG_PACK_FIRST &&
+                         !LangPackFontIsKanji(Pc_LangPackListFont(g_PcConfig.language - LANG_PACK_FIRST)))
+                    jp = JP_LANG_ENGLISH;
+
+                if (jp >= 0 && jp != g_PcConfig.jpLanguage)
+                {
+                    static const char* const s_JpCodes[JP_LANG_COUNT] = { "ja", "zh", "en" };
+
+                    g_PcConfig.jpLanguage = jp;
+                    PcConfig_SaveKeyValue("jp_language", s_JpCodes[jp]);
+                }
+            }
+        }
+    }
+
+    /* A PAL fan patch's retuned kerning has to be in before anything measures
+     * a string. (The USA equivalent rides along with item text in FanTextInit.) */
+    if (g_GameRegion == Region_EUR)
+    {
+        EurFanFontInit();
+    }
+
+    /* Russian patches repaint the font's Latin cells with Cyrillic, which turns
+     * every compiled English menu string into nonsense. Detect them and swap in
+     * the port's own Russian text, encoded in that patch's charset. */
+    Pc_RuInit();
+
+    /* A PC-side pack language (no disc carries it) serves item and story text
+     * from gamedata/lang instead of the disc. EUR only: the glyphs for its
+     * extra letters are built into the EUR FONT16 atlas (font_region.c), and
+     * the US atlas has no accent cells to hold them. The per-map English
+     * overlay walk (still EUR) supplies the count and untranslated fallback,
+     * so the disc path below is left entirely alone. */
+    /* A PC-side pack on a Russian disc would fight it: the pack's byte window
+     * (0xA2-0xB3) is Cyrillic letters there, and Font_PatchPolishGlyphs paints
+     * its letterforms over atlas cells the repaint already uses. The disc wins,
+     * so fall back to the disc's own language slot before anything indexes on it. */
+    if (Pc_RuActive() && g_PcConfig.language >= LANG_PACK_FIRST)
+    {
+        g_PcConfig.language = 0;
+    }
+
+    /* Cyrillic needs the PAL cell grid and there is no Latin that stands in for
+     * it: the pack replaces all 126 cells, so on a disc without that grid every
+     * Russian glyph draws from art that is not a font. The Latin packs degrade
+     * to base letters and stay legible; this one cannot, so it is refused here
+     * rather than shown as a screen of rubble. */
+    if (g_PcConfig.language >= LANG_PACK_FIRST && !Font_EurGridBacked())
+    {
+        const char* code = Pc_LangIdForSlot(g_PcConfig.language);
+        int         idx  = (code != NULL) ? Pc_LangPackListFind(code) : -1;
+
+        if (idx >= 0 && Pc_LangPackListFont(idx) == LANG_PACK_FONT_CYRILLIC)
+        {
+            SH_WARN("[LANG] %s needs the PAL cell grid, which this disc has other "
+                    "art at - using this disc's own language instead", code);
+            /* For this session only. The saved key is left alone on purpose: a
+             * PAL player who boots a USA disc once must find Russian still set
+             * when they go back, and the one log line a boot costs is nothing. */
+            g_PcConfig.language = 0;
+        }
+    }
+
+    if (g_PcConfig.language >= LANG_PACK_FIRST)
+    {
+        if (Pc_LangPackLoad(Pc_LangIdForSlot(g_PcConfig.language)))
+        {
+            /* Whatever letterforms this pack needs; the atlas itself is built
+             * at FONT16 upload (Font_PatchPackGlyphs). */
+            /* Every non-kanji pack draws through the PAL grid: the Latin ones
+             * for their accents, Polish and Russian for the cells they build
+             * into. On a PAL disc that is the atlas in VRAM; elsewhere it is
+             * the pinned override Font_HiresGridSync registers, or, with no
+             * eur16.tim to build it from, Font_UseEurAtlas declines and the
+             * pack draws base letters. A Shift-JIS pack rasterizes its own
+             * and needs none either way. */
+            if (!LangPackFontIsKanji(Pc_LangPackFont()))
+            {
+                Font_UseEurAtlas();
+                Pc_KanjiSetChinese(0); /* in case the last pack was Chinese */
+            }
+
+            if (Pc_LangPackFont() == LANG_PACK_FONT_CYRILLIC)
+                Font_UseRussianLayout();
+            else if (Pc_LangPackFont() == LANG_PACK_FONT_POLISH)
+                Font_UsePolishLayout();
+            else if (Pc_LangPackFont() == LANG_PACK_FONT_PORTUGUESE)
+                Font_UsePortugueseLayout();
+            else if (Pc_LangPackFont() == LANG_PACK_FONT_CHINESE)
+            {
+                /* This pack carries its own item text, so there is nothing to
+                 * install alongside it -- only the glyph table to switch. */
+                Pc_KanjiSetChinese(1);
+            }
+            else if (Pc_LangPackFont() == LANG_PACK_FONT_SJIS)
+            {
+                /* The pack carries the story; the Japanese item text is
+                 * already compiled in, and so are the port's own Japanese
+                 * UI rows, so install those alongside it. Menu strings the
+                 * JP disc supplies (save-point names, option values) are not
+                 * reachable on another disc and stay English. */
+                int i;
+
+                Pc_KanjiSetChinese(0);
+                for (i = 0; i < ITEM_TEXT_COUNT; i++)
+                {
+                    s_ItemNames[i] = INVENTORY_ITEM_NAMES_JPN[i];
+                    s_ItemDescs[i] = ITEM_DESCRIPTIONS_JPN[i];
+                }
+                s_ItemTextReady = 1;
+            }
+            /* Item name/desc come from the pack (Pc_LangItemName checks it
+             * first); untranslated entries fall back to the compiled US
+             * strings in item_screens_3.c. Story text is overlaid per map on
+             * the English EUR overlay walk below. No disc item load needed. */
+            return;
+        }
+        SH_WARN("[LANG] pack '%s' unavailable (region=%d) — English",
+                Pc_LangIdForSlot(g_PcConfig.language), (int)g_GameRegion);
+        g_PcConfig.language = 0;
+    }
+    else
+    {
+        Pc_LangPackFree();
+    }
+
+    if (g_GameRegion == Region_USA)
+    {
+        FanTextInit();
+        return;
+    }
+
+    /* NTSC-J ships Japanese item names/descriptions; retail selects them at
+     * compile time, so install the compiled JP tables here instead. Story text
+     * is handled separately by the SJIS map-message path. */
+    if (g_GameRegion == Region_JPN)
+    {
+        int i;
+
+        /* English on a Japanese disc: the port compiles the US branch of every
+         * table, so the way to show English is to install NOTHING -- no item
+         * tables, no disc menu strings, no SJIS map messages. Asked for by
+         * players who want the Japanese release's look with text they read. */
+        if (g_PcConfig.jpLanguage == JP_LANG_ENGLISH)
+        {
+            Pc_KanjiSetChinese(0);
+            s_ItemTextReady = 0;
+            s_ZhPackActive  = 0;
+            Pc_JpnMenuInit();   /* reads the disc; Pc_JpnMenuText gates on the language */
+            SH_LOG("[LANG] NTSC-J showing the compiled English text");
+            return;
+        }
+
+        /* Chinese draws from a second glyph set over the same kuten codes. */
+        Pc_KanjiSetChinese(g_PcConfig.jpLanguage == JP_LANG_CHINESE);
+
+        for (i = 0; i < ITEM_TEXT_COUNT; i++)
+        {
+            s_ItemNames[i] = INVENTORY_ITEM_NAMES_JPN[i];
+            s_ItemDescs[i] = ITEM_DESCRIPTIONS_JPN[i];
+        }
+        s_ItemTextReady = 1;
+        SH_LOG("[LANG] NTSC-J inventory text installed (%d entries)", ITEM_TEXT_COUNT);
+
+        /* A fan-translated JP disc (the Chinese patch) rewrites those same
+         * arrays; adopting them replaces the pointers just installed. */
+        JpnFanTextInit();
+
+        /* Chinese wanted, but this disc is not the Chinese release: take the
+         * words from zh.pack instead. That is the whole point of the pack —
+         * the port already has the glyphs, so with the text supplied a RETAIL
+         * Japanese disc can show Chinese and switch to it in game. */
+        s_ZhPackActive = 0;
+        if (g_PcConfig.jpLanguage && !s_JpnDiscIsChinese && Pc_LangZhAvailable())
+        {
+            int installed = 0;
+
+            for (i = 0; i < ITEM_TEXT_COUNT; i++)
+            {
+                const char* nm = Pc_LangZhItemName(i);
+                const char* ds = Pc_LangZhItemDesc(i);
+
+                /* Only over entries the pack actually carries: the JP tables
+                 * are mostly NULL (78 of 195 are real items) and a NULL there
+                 * is meaningful — it is what the inventory tests. */
+                if (nm != NULL)
+                {
+                    s_ItemNames[i] = nm;
+                    installed++;
+                }
+                if (ds != NULL)
+                {
+                    s_ItemDescs[i] = ds;
+                }
+            }
+            s_ItemTextReady = 1;
+            s_ZhPackActive  = 1;
+            SH_LOG("[LANG-ZH] Chinese text pack installed (%d inventory entries) — "
+                   "no disc patch needed", installed);
+        }
+
+        if (g_PcConfig.jpLanguage && !s_JpnDiscIsChinese && !s_ZhPackActive)
+        {
+            /* Chinese is a GLYPH swap over unchanged kuten codes, so it only
+             * spells Chinese if the disc supplied Chinese strings. Left on over
+             * the compiled Japanese text every code draws some unrelated
+             * character — reported as "text is corrupted when CN is selected",
+             * which is what a retail JP disc (or a CN disc whose BODYPROG did
+             * not parse) does. Japanese glyphs over Japanese text at least
+             * reads correctly. */
+            Pc_KanjiSetChinese(0);
+            SH_WARN("[LANG] Chinese selected but neither this disc nor gamedata/lang/"
+                    "zh.pack carries Chinese text — using Japanese glyphs.");
+        }
+        Pc_JpnMenuInit();
+        return;
+    }
+
+    if (!Pc_LangActive())
+        return;
+
+    /* pathIdx 9 = VIN, type 2 = .BIN in the EUR table. */
+    if (!Fs_EurFileLookup(s_ItemBinNames[g_PcConfig.language], 9, 2, &sector, &blocks))
+    {
+        SH_WARN("[LANG] %s not found in the EUR file table", s_ItemBinNames[g_PcConfig.language]);
+        return;
+    }
+
+    size = blocks << 8;
+    bin  = Pc_LangReadDiscFile(sector, size);
+    if (bin == NULL)
+    {
+        SH_WARN("[LANG] failed to read %s from the disc image", s_ItemBinNames[g_PcConfig.language]);
+        return;
+    }
+
+    /* Translated strings can only grow by the NUL per entry; 2x is plenty. */
+    s_ItemPool = (char*)malloc(size * 2);
+    out        = s_ItemPool;
+    s_ItemTextReady = 1;
+
+    for (i = 0; i < ITEM_TEXT_COUNT; i++)
+    {
+        unsigned int namePtr = *(unsigned int*)(bin + 4 + (i * 8));
+        unsigned int descPtr = *(unsigned int*)(bin + 8 + (i * 8));
+
+        s_ItemNames[i] = NULL;
+        s_ItemDescs[i] = NULL;
+
+        if (namePtr > ITEM_TEXT_BASE && namePtr - ITEM_TEXT_BASE < size)
+        {
+            s_ItemNames[i] = out;
+            out            = TranslateItemText(out, bin + (namePtr - ITEM_TEXT_BASE));
+        }
+        if (descPtr > ITEM_TEXT_BASE && descPtr - ITEM_TEXT_BASE < size)
+        {
+            s_ItemDescs[i] = out;
+            out            = TranslateItemText(out, bin + (descPtr - ITEM_TEXT_BASE));
+        }
+    }
+
+    free(bin);
+    SH_LOG("[LANG] item text loaded: %s", s_ItemBinNames[g_PcConfig.language]);
+}
+
+/* Live language switch — title-screen options menu only (no map loaded, so
+ * nothing already-extracted goes stale; the next New Game/Load/demo picks
+ * everything up through the normal per-map path). Persists the config key,
+ * rebinds the file table and reloads item text. */
+/* Story text is installed per map at load time, so a switch in game would
+ * leave the loaded map in the old language until the next door. g_OvlDynamic
+ * still holds this map's overlay -- the same pointer game_boot.c passes -- so
+ * the installer runs again against it, then the mod text overrides on top, in
+ * the order a map load applies them. Never on a PAL disc: its switch rebinds
+ * the file table, which only the title screen can do. */
+static void LangRepatchLoadedMap(void)
+{
+    extern void Pc_TextOverrideApply(int mapIdx);
+    int         mapIdx;
+
+    if (g_GameRegion == Region_EUR || g_GameWork.gameState != GameState_InGame ||
+        g_OvlDynamic == NULL || g_SavegamePtr == NULL)
+        return;
+
+    mapIdx = (int)g_SavegamePtr->mapIdx;
+    if (mapIdx < 0 || mapIdx >= 45)
+        return;
+
+    Pc_LangPatchMapMessages(
+        mapIdx, g_OvlDynamic,
+        (unsigned int)g_FileTable[FILE_VIN_MAP0_S00_BIN + mapIdx].blockCount << 8);
+    Pc_TextOverrideApply(mapIdx);
+}
+
+void Pc_LangSetLanguage(int lang)
+{
+    int packs = Pc_LangPackListCount();
+
+    /* `lang` is a LANGUAGE ID, not a row position. The two stopped being the
+     * same number when the row became a per-disc slot list, and checking an id
+     * against the ROW COUNT quietly turned every language past the fifth pack
+     * into English: with eleven rows, ids 6..10 passed and ja, pl, pt, ru and
+     * zh -- 11 and up -- were rejected. They could be highlighted and never
+     * arrived, with nothing logged, because this returns before the loader. */
+    if (lang < 0 ||
+        (lang >= LANG_PACK_FIRST && (packs <= 0 || lang - LANG_PACK_FIRST >= packs)))
+    {
+        lang = 0;
+    }
+
+    g_PcConfig.language = lang;
+    /* The CODE, not the slot: installing or removing a pack renumbers the
+     * slots, and nobody's language should move because of that. */
+    PcConfig_SaveKeyValue("language", Pc_LangIdForSlot(lang));
+    /* Pack languages fall through to the English disc assets (the redirect
+     * only knows the five disc languages), which is what they want: the pack
+     * supplies the text, the disc supplies everything else. */
+    Fs_ApplyLanguageRedirects();
+    Pc_LangInit();
+
+    /* A pack's built letters (ą ę ł ż + caps) live in atlas cells patched onto
+     * the FONT16 pixels at upload time (font_region.c). FONT16 was uploaded at
+     * boot, before this live switch, so those cells are still blank — re-queue
+     * the atlas so Font_PatchPolishGlyphs runs against the now-active pack.
+     * (Composed accents like ć/ś/ó reuse vanilla cells and were fine already.)
+     * Done inline rather than queued: the layout changes the instant the
+     * language does, so a queued read leaves a frame or more drawing the old
+     * pixels at the new advances -- visible as a lag when stepping on or off
+     * Russian, which replaces the whole atlas. EUR only; pack languages need
+     * that atlas. */
+    if (g_GameRegion == Region_EUR)
+    {
+        Font_AtlasReloadNow();
+    }
+
+    /* A hi-res font pack is a separate override, registered when FONT16 is
+     * post-loaded and left exactly as it was by the inline reload above. So
+     * after a switch it still held the OLD language's letters: Latin art on
+     * top of a freshly built Cyrillic atlas, which drew Latin letterforms at
+     * Cyrillic byte values. Queue the read the game's own EUR paths queue
+     * (game_boot, b_konami, fs_screens): its post-load drops the stale
+     * override with the upload and registers the right one, or none for
+     * Russian. Every disc: the descriptor never leaves the disc's own home
+     * now (the PAL grid elsewhere is a pinned override, no upload), so the
+     * read lands where the disc's font always lands. */
+    Fs_QueueStartReadTim(FILE_1ST_FONT16_TIM, FS_BUFFER_1, &g_Font16AtlasImg);
+
+    LangRepatchLoadedMap();
+
+    SH_LOG("[LANG] language switched to '%s'", Pc_LangIdForSlot(lang));
+}
+
+/* NTSC-J text language: 0 Japanese, 1 Chinese.
+ *
+ * This used to swap only the rasterizer's glyph set, which was the whole job
+ * back when the words could only come from a Chinese-patched disc — the codes
+ * were already on the disc and only the glyphs drawn at them changed. With
+ * zh.pack supplying the words for an unpatched disc that is now half the job:
+ * swapping glyphs alone left every string Japanese, so the switch appeared to
+ * do nothing. Reinstall the text too, the same way Pc_LangSetLanguage does for
+ * PAL. Pc_LangInit picks the glyph set itself (and stands it back down if
+ * neither the disc nor the pack has Chinese), so it is not set here. */
+void Pc_LangSetJpLanguage(int lang)
+{
+    static const char* const s_JpIds[JP_LANG_COUNT] = { "ja", "zh", "en" };
+
+    if (lang < 0 || lang >= JP_LANG_COUNT)
+        lang = 0;
+
+    g_PcConfig.jpLanguage = lang;
+    PcConfig_SaveKeyValue("jp_language", s_JpIds[lang]);
+    Pc_LangInit();
+
+    LangRepatchLoadedMap();
+
+    SH_LOG("[LANG] NTSC-J language switched to '%s'", lang ? "zh" : "ja");
+}
+
+/* ---- Options-menu Language row -------------------------------------------
+ * The row works in SLOTS (0..count-1) so it needs no region knowledge of its
+ * own: PAL cycles the disc's five languages plus the PC-side packs, NTSC-J
+ * cycles Japanese and Chinese. The two lists share no ids and no config key. */
+
+int Pc_LangSlotCount(void)
+{
+    return SlotsCount();
+}
+
+int Pc_LangSlotCurrent(void)
+{
+    /* On a Japanese disc the row spans both axes: a pack wins when one is
+     * loaded, otherwise the position is whichever of the disc's own three the
+     * jp_language key names. */
+    if (g_GameRegion == Region_JPN && !Pc_LangPackActive())
+        return SlotOfLang(SLOT_JP_FIRST - g_PcConfig.jpLanguage);
+
+    return SlotOfLang(g_PcConfig.language);
+}
+
+void Pc_LangSlotSet(int slot)
+{
+    int v = SlotLang(slot);
+
+    if (SlotIsJp(v))
+    {
+        /* Leaving a pack for one of the disc's own: drop the pack first, or
+         * its text would still be overlaid on top of the disc's. */
+        if (Pc_LangPackActive())
+            Pc_LangSetLanguage(0);
+
+        Pc_LangSetJpLanguage(SlotJpLang(v));
+        return;
+    }
+
+    /* A pack on a Japanese disc: stand the disc's own text down, so the pack
+     * is what gets installed and untranslated lines fall back to English
+     * rather than to Japanese. */
+    if (g_GameRegion == Region_JPN && g_PcConfig.jpLanguage != JP_LANG_ENGLISH)
+        Pc_LangSetJpLanguage(JP_LANG_ENGLISH);
+
+    Pc_LangSetLanguage(v);
+}
+
+const char* Pc_LangSlotName(int slot)
+{
+    /* Names in the retail PAL option-menu order (= config language index).
+     * Index LANG_PACK_FIRST and up are PC-side packs, labelled by the pack's
+     * own `!menu` field (e.g. "POLISH"). */
+    /* Both Englishes are always named by release. A plain "English" for the
+     * disc's own read as a third English beside the two qualified ones. */
+    static const char* const s_PalNames[LANG_PACK_FIRST] = {
+        "PAL_English", "German", "French", "Spanish", "Italian", "US_English"
+    };
+
+    /* The pack's own `!menu` label, read from the registry rather than from
+     * the loaded pack -- the row is browsed before anything is loaded. */
+    {
+        int lang = SlotLang(slot);
+
+        if (SlotIsJp(lang))
+        {
+            /* The disc's own three. Its English is the compiled US script --
+             * PAL English is a pack on this disc. */
+            static const char* const s_JpNames[JP_LANG_COUNT] = {
+                "Japanese", "Chinese", "US_English"
+            };
+            int jp = SlotJpLang(lang);
+
+            return s_JpNames[(jp >= 0 && jp < JP_LANG_COUNT) ? jp : 0];
+        }
+
+        if (lang >= LANG_PACK_FIRST)
+            return Pc_LangPackListName(lang - LANG_PACK_FIRST);
+
+        /* Slot 0 off a PAL disc is the compiled US script. */
+        if (lang == 0 && g_GameRegion != Region_EUR)
+            return "US_English";
+        return s_PalNames[(lang >= 0 && lang < LANG_PACK_FIRST) ? lang : 0];
+    }
+}
+
+/* Left edge for the value name, nudged per word length the way the retail
+ * On/Off values are (the row draws right-aligned-ish against fixed arrows). */
+/* The row's arrows, in screen x, before options.c spreads them: the left one's
+ * inner tip and the right one's (FRONT_ARROWS, Auto Load row, +160 centre). */
+#define LANG_ROW_ARROW_L    208
+#define LANG_ROW_ARROW_R    248
+#define LANG_ROW_PAD        6   /* clear space between a name and either arrow */
+#define LANG_ROW_SPREAD_MIN 26  /* what the row always had: room for retail's names */
+#define LANG_ROW_SPREAD_MAX 50  /* left arrow stays clear of the row's own label */
+
+static int SlotNameWidth(int slot)
+{
+    /* Drawn translated ("English" reads "Englisch" under German), so measured so. */
+    return Pc_LangMenuTextWidth(Pc_LangMenuText(Pc_LangSlotName(slot)));
+}
+
+/* How far options.c moves each arrow outward for this name: the old fixed
+ * spread, or enough to clear a longer one ("PAL English" is 105px, the row
+ * between the arrows was 92), never so far the left arrow meets the label. */
+int Pc_LangSlotArrowSpread(int slot)
+{
+    int need = (SlotNameWidth(slot) + 2 * LANG_ROW_PAD - (LANG_ROW_ARROW_R - LANG_ROW_ARROW_L) + 1) / 2;
+
+    if (need < LANG_ROW_SPREAD_MIN)
+        need = LANG_ROW_SPREAD_MIN;
+    return (need > LANG_ROW_SPREAD_MAX) ? LANG_ROW_SPREAD_MAX : need;
+}
+
+/* Centred between the arrows. Retail placed its five by hand (198/204), which
+ * only worked because they were all about one width; a pack can be called
+ * anything, and centring is what retail's placement approximated anyway. */
+int Pc_LangSlotNameX(int slot)
+{
+    return (LANG_ROW_ARROW_L + LANG_ROW_ARROW_R) / 2 - SlotNameWidth(slot) / 2;
+}
+
+/* The options menu shows the Language row only on EUR discs and only when
+ * entered from the title screen (mirrors how retail applied language at the
+ * front end; in-game the row stays Auto Load). */
+int Pc_LangMenuRowActive(void)
+{
+    /* Also on fan-translated USA discs: there the row only switches the
+     * port's menu translations (story/item text stays whatever language the
+     * disc patch carries). Not on a Russian patch though — its font has no
+     * Latin letters, so every other language on the row is unreadable and the
+     * menus are already Russian; the slot goes back to retail's Auto Load. */
+    if (Pc_RuActive())
+    {
+        return 0;
+    }
+
+    /* NTSC-J keeps the row in-game as well. The title-screen restriction exists
+     * because a PAL switch rebinds the file table and reloads item text, which
+     * would strand whatever the current map already extracted; the NTSC-J
+     * switch only picks a glyph set, so it is safe at any time. Nothing is lost
+     * by taking the slot: Auto Load is read once, at the Konami logo
+     * (b_konami.c), so its row does nothing in-game anyway and is still
+     * reachable from the title screen where it takes effect. */
+    if (g_GameRegion == Region_JPN)
+        return 1;
+
+    /* Anywhere there is more than one language to pick. A US disc used to have
+     * none; with packs installing on every region it can have several, and the
+     * row is the only way to reach them. Still title-screen only: a switch
+     * rebinds the file table and reloads item text, which would strand what
+     * the loaded map already extracted. */
+    if (!g_PcConfig.crossRegionLanguages && g_GameRegion != Region_EUR)
+        return 0; /* retail behaviour: this row is Auto Load off a PAL disc */
+
+    /* In-game too off a PAL disc (see SlotsOfferPacks). Auto Load, which the
+     * row replaces, is read once at the Konami logo and does nothing here. */
+    return SlotsCount() > 1 &&
+           (g_GameWork.gameStatePrev == GameState_MainMenu || g_GameRegion != Region_EUR);
+}
+
+const char* Pc_LangItemName(int itemIdx)
+{
+    if (Pc_LangPackActive())
+        return Pc_LangPackItemName(itemIdx);
+
+    if (!s_ItemTextReady || itemIdx < 0 || itemIdx >= ITEM_TEXT_COUNT)
+        return NULL;
+    /* Empty strings mean "untranslated" on the disc — fall back to English. */
+    return (s_ItemNames[itemIdx] && s_ItemNames[itemIdx][0]) ? s_ItemNames[itemIdx] : NULL;
+}
+
+/* "~N" is the MAP-MESSAGE newline, understood by the message drawer. Item text
+ * goes through Gfx_StringDraw, which knows only a literal newline -- and drops
+ * '~' outright, because 0x7E is past the 'z' its glyph range ends at, leaving
+ * the 'N' to draw as a letter. That is the stray N in the Japanese inventory.
+ *
+ * Normalising HERE rather than in the tables is deliberate: the Japanese text
+ * can arrive from three places -- the compiled table, a patched disc adopted by
+ * JpnFanTextInit, or zh.pack -- and fixing only the compiled one made it DIFFER
+ * from the disc, which is precisely the test JpnFanTextInit uses to decide a
+ * disc is patched. It then adopted the disc's own "~N" text and put the N
+ * straight back. One conversion at the exit covers every source.
+ *
+ * The caller (Gfx_Inventory_ItemDescriptionDraw) draws the string immediately
+ * and does not retain it, so one rotating buffer is enough for the two calls a
+ * frame; text without a "~N" is returned untouched. */
+static const char* NormalizeItemText(const char* s)
+{
+    static char s_buf[2][512];
+    static int  s_next;
+
+    const char* p;
+    char*       out;
+    char*       end;
+
+    if (s == NULL)
+        return NULL;
+
+    for (p = s; *p != '\0'; p++)
+    {
+        if (p[0] == '~' && p[1] == 'N')
+            break;
+    }
+
+    if (*p == '\0')
+        return s;
+
+    out    = s_buf[s_next];
+    s_next = (s_next + 1) & 1;
+    end    = out + sizeof(s_buf[0]) - 1;
+
+    for (p = s; *p != '\0' && out < end; p++)
+    {
+        if (p[0] == '~' && p[1] == 'N')
+        {
+            *out++ = '\n';
+            p++;
+            continue;
+        }
+        *out++ = *p;
+    }
+
+    *out = '\0';
+    return s_buf[(s_next + 1) & 1];
+}
+
+const char* Pc_LangItemDesc(int itemIdx)
+{
+    if (Pc_LangPackActive())
+        return NormalizeItemText(Pc_LangPackItemDesc(itemIdx));
+
+    if (!s_ItemTextReady || itemIdx < 0 || itemIdx >= ITEM_TEXT_COUNT)
+        return NULL;
+    return NormalizeItemText((s_ItemDescs[itemIdx] && s_ItemDescs[itemIdx][0]) ? s_ItemDescs[itemIdx] : NULL);
+}
+
+/* ------------------------------------------------------------------ */
+/* Map messages                                                        */
+/* ------------------------------------------------------------------ */
+
+/* Translate one PAL map message to the US dialect:
+ *   {X...}  -> ~X...  (single-letter codes E/D/H/M get a ' ' pad — the US
+ *                      parser always consumes one arg byte after the letter)
+ *   '\n'    -> "~N "  (US newline code; PAL uses the literal byte)
+ *   '\t'    -> dropped (both parsers skip tabs; PAL uses them as indent art)
+ *   ' '     -> '_'    (US space stand-in)
+ *   >=0x80  -> raw    (Latin-1 accents; resolved by the region font layout)
+ * Returns the advanced dst (past the NUL). */
+static char* TranslateMapMsg(char* dst, const unsigned char* src, int isFinalPart)
+{
+    for (; *src != '\0'; src++)
+    {
+        unsigned char c = *src;
+
+        if (c == '{')
+        {
+            int  codeLen   = 0;
+            char codeFirst = 0;
+
+            *dst++ = '~';
+            for (src++; *src != '\0' && *src != '}'; src++)
+            {
+                if (codeLen == 0)
+                    codeFirst = (char)*src;
+                *dst++ = (char)*src;
+                codeLen++;
+            }
+            if (*src == '\0')
+                break;
+            if (codeLen == 1)
+                *dst++ = ' ';
+            /* The US ~J parsers scan FORWARD for a space/tab after the
+             * closing ')' (both the width pre-pass and the already-timed
+             * draw path) — without one they run off the string. US data
+             * always has a tab there; emit one (tabs are skipped everywhere
+             * else). */
+            if (codeFirst == 'J')
+                *dst++ = '\t';
+        }
+        else if (c == '\n')
+        {
+            *dst++ = '~';
+            *dst++ = 'N';
+            *dst++ = ' ';
+        }
+        else if (c == '\t')
+        {
+            /* skip */
+        }
+        else if (c == ' ')
+        {
+            *dst++ = '_';
+        }
+        else
+        {
+            *dst++ = (char)c;
+        }
+    }
+
+    (void)isFinalPart;
+    *dst++ = '\0';
+    return dst;
+}
+
+/* Count rendered lines (1 + ~N codes). */
+static int MsgLineCount(const char* msg)
+{
+    int lines = 1;
+    for (; *msg; msg++)
+    {
+        if (msg[0] == '~' && msg[1] == 'N')
+            lines++;
+    }
+    return lines;
+}
+
+static int SplitPartsFor(int mapIdx, int usIdx)
+{
+    int i;
+    for (i = 0; i < (int)(sizeof(s_MsgSplits) / sizeof(s_MsgSplits[0])); i++)
+    {
+        if (s_MsgSplits[i].mapIdx == mapIdx && s_MsgSplits[i].lang == g_PcConfig.language &&
+            s_MsgSplits[i].usIdx == usIdx)
+        {
+            return s_MsgSplits[i].parts;
+        }
+    }
+    return 1;
+}
+
+/* Message-table pointers are linked for the overlay's PSX load base. An in-place
+ * fan patch (Spanish) keeps the US base USA_OVL_BASE; a REBUILT disc (Brazilian)
+ * relinks the overlay to a different base, so both the word@0x34 table pointer
+ * and every string pointer are shifted by a constant. The overlay layout is
+ * otherwise identical. Detect the base by the value for which word@0x34 resolves
+ * to a run of clean text messages (the table always opens with the short Yes/No
+ * pair). Returns USA_OVL_BASE for vanilla/in-place discs (their table resolves
+ * there on the first try, so they take the fast path and are never rescanned). */
+#define MSG_MIN_CLEAN_RUN 8
+
+/* Length of a NUL-terminated message if every byte is engine text (printable
+ * ASCII, high-bit accents, or the tab/newline used for layout); -1 otherwise. */
+static int MsgCleanLen(const unsigned char* s, const unsigned char* end)
+{
+    int n = 0;
+    for (; s < end && *s != '\0'; s++, n++)
+    {
+        unsigned char c = *s;
+        if (c != '\t' && c != '\n' && c < 0x20)
+            return -1;
+    }
+    return (s < end) ? n : -1; /* must terminate inside the overlay */
+}
+
+/* Consecutive clean messages the table at (tablePsx - base) resolves to. */
+static int MsgCleanRun(const unsigned char* ovl, unsigned int ovlSize, unsigned int tablePsx, unsigned int base)
+{
+    unsigned int tableOff;
+    int          i;
+
+    if (tablePsx <= base || tablePsx - base >= ovlSize)
+        return 0;
+    tableOff = tablePsx - base;
+
+    for (i = 0; i < 250; i++)
+    {
+        unsigned int ptr;
+        int          len;
+
+        if (tableOff + (unsigned int)(i + 1) * 4 > ovlSize)
+            break;
+        ptr = *(const unsigned int*)(ovl + tableOff + i * 4);
+        if (ptr <= base || ptr - base >= ovlSize)
+            break;
+        /* The string must START on a boundary (the byte before it is a NUL
+         * terminator). An off-by-a-few-bytes base still yields printable text
+         * but lands mid-string; rejecting that pins `base` to the overlay's
+         * EXACT link base. Message-only use tolerated a few bytes of slack, but
+         * the player map-anim loader reuses this base to rebase field_38 (the
+         * per-map Harry anim table) — that needs the exact base or the pointer
+         * lands mid-struct. */
+        if (ptr - base != 0 && ovl[(ptr - base) - 1] != '\0')
+            break;
+        len = MsgCleanLen(ovl + (ptr - base), ovl + ovlSize);
+        if (len < 1 || len > 600)
+            break;
+        if (i < 2 && len > 6) /* the first two are always the short Yes/No pair */
+            return 0;
+    }
+    return i;
+}
+
+/* A dub-only release (ViT Co / Metallist) strips the words out of every voiced
+ * line and leaves the "~J0(seconds)" timing command behind, so the scene still
+ * paces to the dubbed audio but draws nothing. That is what the disc says and
+ * what real hardware shows, so it is not corrected here — only reported, since
+ * it reads as a port bug ("no subtitles") every time someone runs one. */
+static int MsgIsVoicedButBlank(const char* s)
+{
+    int visible = 0;
+
+    if (strstr(s, "~J0(") == NULL)
+        return 0;
+
+    for (; *s != '\0'; s++)
+    {
+        if (*s == '~')
+        {
+            /* Commands are ~ + letter + optional index digits + optional
+             * "(2.0)" argument: ~E, ~C2, ~J0(6.0). */
+            if (s[1] != '\0')
+                s++;
+            while (s[1] >= '0' && s[1] <= '9')
+                s++;
+            if (s[1] == '(')
+            {
+                while (s[1] != '\0' && s[1] != ')')
+                    s++;
+                if (s[1] == ')')
+                    s++;
+            }
+            continue;
+        }
+        if (*s != ' ' && *s != '\t' && *s != '\n' && *s != '\r' && *s != '_')
+            visible = 1;
+    }
+    return !visible;
+}
+
+static unsigned int UsaDetectOverlayBase(const unsigned char* ovl, unsigned int ovlSize)
+{
+    static unsigned int s_rebuiltBase = 0; /* cache: a disc has ONE overlay base */
+    unsigned int        tablePsx      = *(const unsigned int*)(ovl + 0x34);
+    unsigned int        bestBase      = USA_OVL_BASE;
+    int                 bestRun       = 0;
+    unsigned int        b;
+
+    if (MsgCleanRun(ovl, ovlSize, tablePsx, USA_OVL_BASE) >= MSG_MIN_CLEAN_RUN)
+        return USA_OVL_BASE; /* vanilla / in-place patch — no scan */
+
+    if (s_rebuiltBase != 0 &&
+        MsgCleanRun(ovl, ovlSize, tablePsx, s_rebuiltBase) >= MSG_MIN_CLEAN_RUN)
+        return s_rebuiltBase;
+
+    for (b = USA_OVL_BASE - 0x2000; b <= USA_OVL_BASE + 0x400; b += 4)
+    {
+        int run = MsgCleanRun(ovl, ovlSize, tablePsx, b);
+        if (run > bestRun)
+        {
+            bestRun  = run;
+            bestBase = b;
+        }
+    }
+    if (bestRun >= MSG_MIN_CLEAN_RUN)
+    {
+        s_rebuiltBase = bestBase;
+        return bestBase;
+    }
+    return USA_OVL_BASE; /* unrecognized — caller's range checks keep English */
+}
+
+/* Link base of the internal pointers in a loaded USA map overlay. USA_OVL_BASE
+ * for vanilla / in-place patched (Spanish) discs; a per-map LOWER base for a
+ * REBUILT disc (Brazilian re-translation), where each overlay is relinked below
+ * the US base by a per-map delta. The player map-anim loader
+ * (GameFs_PlayerMapAnimLoad) uses this to rebase the field_38 / g_MapHeaderTable_38
+ * pointer it reads straight out of the loaded overlay, the SAME delta the message
+ * table (offset 0x34) is shifted by — otherwise field_38 resolves into unrelated
+ * overlay bytes and Harry's per-map animation-transition table is garbage. `ovl`
+ * is the loaded overlay (g_OvlDynamic); mapIdx bounds the base scan by the VIN
+ * file size. Returns USA_OVL_BASE (delta 0, no-op) for anything but a USA disc
+ * whose current overlay relinked below the US base. */
+unsigned int Pc_UsaOverlayLinkBase(const void* ovl, int mapIdx)
+{
+    unsigned int ovlSize;
+
+    if (g_GameRegion != Region_USA || ovl == NULL || mapIdx < 0 || mapIdx >= 45)
+        return USA_OVL_BASE;
+
+    ovlSize = (unsigned int)g_FileTable[FILE_VIN_MAP0_S00_BIN + mapIdx].blockCount << 8;
+    if (ovlSize < 0x40)
+        return USA_OVL_BASE;
+
+    return UsaDetectOverlayBase((const unsigned char*)ovl, ovlSize);
+}
+
+/* USA map messages come straight off the disc image, not from g_OvlDynamic:
+ * the shared queue buffer isn't guaranteed to hold this map's overlay
+ * (Fs_QueueWaitForEmpty's timeout valve can abandon the read), and reading
+ * it here keeps the vanilla USA load path free of the EUR/JPN queue drain.
+ * Vanilla overlays match the compiled messages byte-for-byte (a matching
+ * decompile), so any difference means a fan-translated disc: repoint the
+ * header at verbatim copies of the disc strings (already US dialect,
+ * identity index mapping). Everything off the disc is treated as untrusted —
+ * unparseable data keeps the compiled English text. */
+static void UsaPatchMapMessages(int mapIdx)
+{
+    const s_FileInfo* fe;
+    unsigned char*    ovl;
+    unsigned int      ovlSize;
+    unsigned int      tablePsx;
+    unsigned int      tableOff;
+    unsigned int      ovlBase;
+    unsigned int      srcPtrs[MSG_COUNT_MAX + 8];
+    unsigned int      poolBytes;
+    int               srcCount;
+    int               cmpCount;
+    int               diff;
+    int               i;
+    char*             newPool;
+    char*             out;
+    const char**      origMsgs;
+    int               dubbed;
+    extern s_MapOverlayHdr* g_pMapOverlayHeader;
+
+    if (mapIdx < 0 || mapIdx >= 45 || g_pMapOverlayHeader == NULL)
+        return;
+    origMsgs = (const char**)g_pMapOverlayHeader->mapMessages;
+    if (origMsgs == NULL)
+        return;
+
+    fe      = &g_FileTable[FILE_VIN_MAP0_S00_BIN + mapIdx];
+    ovlSize = (unsigned int)fe->blockCount << 8;
+    if (ovlSize < 0x40)
+        return;
+    ovl = Pc_LangReadDiscFile(fe->startSector, ovlSize);
+    if (ovl == NULL)
+        return;
+
+    ovlBase  = UsaDetectOverlayBase(ovl, ovlSize);
+    tablePsx = *(unsigned int*)(ovl + 0x34);
+    if (tablePsx < ovlBase || tablePsx - ovlBase >= ovlSize)
+    {
+        free(ovl);
+        return;
+    }
+    tableOff = tablePsx - ovlBase;
+
+    /* Same walk as the EUR/JPN path, plus a NUL-inside-the-overlay check so
+     * no later strlen/strcmp/memcpy can run past the buffer. */
+    poolBytes = 0;
+    for (srcCount = 0; srcCount < (int)(sizeof(srcPtrs) / sizeof(srcPtrs[0])); srcCount++)
+    {
+        unsigned int ptr;
+        const char*  nul;
+
+        if (tableOff + (srcCount + 1) * 4 > ovlSize)
+            break;
+        ptr = *(unsigned int*)(ovl + tableOff + srcCount * 4);
+        if (ptr <= ovlBase || ptr - ovlBase >= ovlSize)
+            break;
+        ptr -= ovlBase;
+        nul = (const char*)memchr(ovl + ptr, '\0', ovlSize - ptr);
+        if (nul == NULL)
+            break;
+        srcPtrs[srcCount] = ptr;
+        poolBytes += (unsigned int)(nul - (const char*)(ovl + ptr)) + 1;
+    }
+
+    /* 1MB cap: a real message table totals well under 64KB — anything bigger
+     * is aliased/garbage pointers. */
+    if (srcCount < 4 || poolBytes > (1u << 20))
+    {
+        free(ovl);
+        return;
+    }
+
+    /* Every US map's compiled table opens with the same 15 shared
+     * map_msg_common.h entries, so indices 0..14 are always in bounds on the
+     * compiled side (the smallest table, map1_s05, is exactly those 15) —
+     * and every known translation rewrites at least one of them ("Yes").
+     * Comparing only that block stays safe against disc tables longer than
+     * the compiled array (the compiled side has no count or terminator). */
+    cmpCount = (srcCount < 15) ? srcCount : 15;
+    diff     = 0;
+    for (i = 0; i < cmpCount; i++)
+    {
+        if (origMsgs[i] == NULL || strcmp(origMsgs[i], (const char*)ovl + srcPtrs[i]) != 0)
+        {
+            diff = 1;
+            break;
+        }
+    }
+    if (!diff)
+    {
+        free(ovl);
+        return;
+    }
+
+    newPool = (char*)malloc(poolBytes + 16);
+    if (newPool == NULL)
+    {
+        free(ovl);
+        return;
+    }
+    free(s_MsgPool);
+    s_MsgPool = newPool;
+    out       = s_MsgPool;
+
+    dubbed = 0;
+    for (i = 0; i < MSG_COUNT_MAX; i++)
+    {
+        if (i < srcCount)
+        {
+            const char* src = (const char*)ovl + srcPtrs[i];
+            size_t      len = strlen(src);
+
+            if (MsgIsVoicedButBlank(src))
+                dubbed++;
+
+            memcpy(out, src, len + 1);
+            s_MsgPtrs[i] = out;
+            out += len + 1;
+        }
+        else
+        {
+            s_MsgPtrs[i] = "";
+        }
+    }
+
+    s_LangMapHeader             = *g_pMapOverlayHeader;
+    s_LangMapHeader.mapMessages = s_MsgPtrs;
+    g_pMapOverlayHeader         = &s_LangMapHeader;
+
+    free(ovl);
+    SH_LOG("[FANPATCH] map %d: %d translated messages installed", mapIdx, srcCount);
+    if (dubbed > 0)
+    {
+        SH_LOG("[FANPATCH] map %d: %d voiced lines have no subtitle text on this disc "
+               "(dub release — the patch removed the words and kept the timing)",
+               mapIdx, dubbed);
+    }
+}
+
+void Pc_LangPatchMapMessages(int mapIdx, void* ovl, unsigned int ovlSize)
+{
+    const unsigned char* bytes = (const unsigned char*)ovl;
+    unsigned int         base;
+    unsigned int         tablePsx;
+    unsigned int         tableOff;
+    unsigned int         srcPtrs[MSG_COUNT_MAX + 8];
+    int                  srcCount;
+    int                  usIdx;
+    int                  srcIdx;
+    int                  isJpn;
+    char*                out;
+    extern s_MapOverlayHdr* g_pMapOverlayHeader;
+
+    /* The header this map loaded with. A second install against the same map
+     * (an in-game language switch) has to start from it: the one in force is
+     * our own copy, whose messages point into the pool freed below, and the
+     * English fallbacks are read from it. */
+    if (g_pMapOverlayHeader != &s_LangMapHeader && g_pMapOverlayHeader != &s_ModMapHeader)
+        s_PristineMapHeader = g_pMapOverlayHeader;
+    else if (s_PristineMapHeader != NULL)
+        g_pMapOverlayHeader = s_PristineMapHeader;
+
+    if (g_GameRegion == Region_USA && !Pc_LangPackActive())
+    {
+        UsaPatchMapMessages(mapIdx);
+        return;
+    }
+
+    /* English on a Japanese disc installs no story text either, so the
+     * compiled US MAP_MESSAGES stand. */
+    isJpn = (g_GameRegion == Region_JPN && g_PcConfig.jpLanguage != JP_LANG_ENGLISH);
+    /* To the log file (the SH_LOG/SH_WARN below only reach stdout/the in-game
+     * console, so a launcher run records nothing about why story text fell back
+     * to compiled English). */
+    SH_DBG("[LANG] map %d: region=%d isJpn=%d ovl=%p ovlSize=%u hdr=%p", mapIdx,
+           (int)g_GameRegion, isJpn, ovl, ovlSize, (void*)g_pMapOverlayHeader);
+    /* A pack carries story text of its own, so it is reason to run even where
+     * the disc has nothing to install (a USA disc, whose compiled strings are
+     * already the text the pack is replacing). */
+    if ((!Pc_LangActive() && !isJpn && !Pc_LangPackActive()) ||
+        ovl == NULL || g_pMapOverlayHeader == NULL || ovlSize < 0x40)
+    {
+        SH_DBG("[LANG] map %d: install SKIPPED (langActive=%d isJpn=%d ovl=%p hdr=%p ovlSize=%u<0x40?)",
+               mapIdx, Pc_LangActive(), isJpn, ovl, (void*)g_pMapOverlayHeader, ovlSize);
+        return;
+    }
+
+    /* Each disc links its overlays at its own base. A rebuilt USA disc moves
+     * even that, so it is detected rather than assumed. */
+    base     = (g_GameRegion == Region_JPN) ? JPN_OVL_BASE
+             : (g_GameRegion == Region_EUR) ? EUR_OVL_BASE
+                                            : Pc_UsaOverlayLinkBase(ovl, mapIdx);
+    tablePsx = *(const unsigned int*)(bytes + 0x34);
+    if (tablePsx < base || tablePsx - base >= ovlSize)
+    {
+        SH_WARN("[LANG] map %d: overlay message table pointer out of range (0x%08X)", mapIdx, tablePsx);
+        SH_DBG("[LANG] map %d: table ptr 0x%08X out of range [base 0x%08X, +0x%X) — keeping English",
+               mapIdx, tablePsx, base, ovlSize);
+        return;
+    }
+    tableOff = tablePsx - base;
+
+    /* Walk the pointer array until a word stops being a valid in-overlay
+     * string pointer (matches the table's on-disc terminator). */
+    for (srcCount = 0; srcCount < (int)(sizeof(srcPtrs) / sizeof(srcPtrs[0])); srcCount++)
+    {
+        unsigned int ptr;
+
+        if (tableOff + (srcCount + 1) * 4 > ovlSize)
+            break;
+
+        ptr = *(const unsigned int*)(bytes + tableOff + srcCount * 4);
+        if (ptr <= base || ptr - base >= ovlSize)
+            break;
+
+        srcPtrs[srcCount] = ptr - base;
+    }
+
+    if (srcCount < 4)
+    {
+        SH_WARN("[LANG] map %d: implausible overlay message count %d — keeping English", mapIdx, srcCount);
+        SH_DBG("[LANG] map %d: implausible message count %d (<4) — keeping English", mapIdx, srcCount);
+        return;
+    }
+
+    free(s_MsgPool);
+    s_MsgPool = (char*)malloc(ovlSize * 2 + 4096);
+    out       = s_MsgPool;
+
+    if (isJpn)
+    {
+        /* JAP strings are already in engine format (same ~ codes, SJIS text
+         * between them) — copy verbatim. The JP tables are 1:1 with US except
+         * on the maps in s_JpnMsgMaps, where the US localization split or
+         * added lines: those get an explicit index map, and US entries with
+         * no JP counterpart (-1) keep the compiled English string. */
+        const short* idxMap   = NULL;
+        int          idxCount = 0;
+        const char** origMsgs = (const char**)g_pMapOverlayHeader->mapMessages;
+        int          i;
+
+        for (i = 0; i < (int)(sizeof(s_JpnMsgMaps) / sizeof(s_JpnMsgMaps[0])); i++)
+        {
+            if (s_JpnMsgMaps[i].mapIdx == mapIdx)
+            {
+                idxMap   = s_JpnMsgMaps[i].map;
+                idxCount = s_JpnMsgMaps[i].count;
+                break;
+            }
+        }
+
+        for (usIdx = 0; usIdx < MSG_COUNT_MAX; usIdx++)
+        {
+            int jpIdx;
+
+            if (idxMap != NULL)
+                jpIdx = (usIdx < idxCount) ? (int)idxMap[usIdx] : -2;
+            else
+                jpIdx = (usIdx < srcCount) ? usIdx : -2;
+
+            if (jpIdx == -1)
+            {
+                /* US-only line: keep the compiled English message. */
+                s_MsgPtrs[usIdx] = (origMsgs != NULL) ? origMsgs[usIdx] : "";
+            }
+            else if (jpIdx < 0 || jpIdx >= srcCount)
+            {
+                s_MsgPtrs[usIdx] = "";
+            }
+            else
+            {
+                /* Pack first when it is driving: the overlay under us is the
+                 * Japanese disc's, so its strings are Japanese and would draw
+                 * as nonsense through the Chinese glyph set. Index with jpIdx,
+                 * because the pack stores the disc's own JP order and the map
+                 * above has already been applied. */
+                const char* src = s_ZhPackActive
+                                      ? Pc_LangZhMapMessage(mapIdx, jpIdx)
+                                      : NULL;
+                size_t      len;
+
+                if (src == NULL)
+                {
+                    src = (const char*)bytes + srcPtrs[jpIdx];
+                }
+                len = strlen(src);
+                memcpy(out, src, len + 1);
+                s_MsgPtrs[usIdx] = out;
+                out += len + 1;
+            }
+        }
+
+        s_LangMapHeader             = *g_pMapOverlayHeader;
+        s_LangMapHeader.mapMessages = s_MsgPtrs;
+        g_pMapOverlayHeader         = &s_LangMapHeader;
+
+        SH_LOG("[LANG] map %d: %d Japanese messages installed", mapIdx, srcCount);
+        SH_DBG("[LANG] map %d: %d Japanese messages installed OK", mapIdx, srcCount);
+        return;
+    }
+
+    /* EUR index k maps to US index k for k<3; the entry at EUR index 3 is the
+     * second half of the split intro message (a "{E}" stub in EN/FR) — join
+     * it into US index 2 — and everything after shifts by one. The
+     * s_MsgSplits table handles the handful of additional per-language page
+     * splits the same way. */
+    /* Only the PAL script needs converting and re-indexing: its codes are a
+     * different dialect and its pages do not line up with the US ones. A USA
+     * overlay is already US-dialect and 1:1, so it is copied straight through
+     * and only the pack's strings land on top of it. */
+    if (g_GameRegion != Region_EUR)
+    {
+        /* A Japanese disc reached here means a pack is what was selected, so
+         * its overlay holds Japanese -- the wrong fallback for a line the pack
+         * leaves untranslated (Polish covers 1272 of 1365, so 93 lines would
+         * have come out Japanese). The compiled English is the right one, and
+         * the pointers still in the header are it. */
+        const char** origMsgs = (g_GameRegion == Region_JPN)
+                                    ? (const char**)g_pMapOverlayHeader->mapMessages
+                                    : NULL;
+
+        for (usIdx = 0; usIdx < srcCount && usIdx < MSG_COUNT_MAX; usIdx++)
+        {
+            const char* src = (origMsgs != NULL)
+                                  ? origMsgs[usIdx]
+                                  : (const char*)bytes + srcPtrs[usIdx];
+            size_t      len;
+
+            if (src == NULL)
+            {
+                s_MsgPtrs[usIdx] = "";
+                continue;
+            }
+            len = strlen(src);
+
+            s_MsgPtrs[usIdx] = out;
+            memcpy(out, src, len + 1);
+            out += len + 1;
+        }
+    }
+    else
+    {
+        srcIdx = 0;
+        for (usIdx = 0; usIdx < MSG_COUNT_MAX && srcIdx < srcCount; usIdx++)
+        {
+            int   parts = (usIdx == 2) ? 2 : SplitPartsFor(mapIdx, usIdx);
+            int   p;
+            char* start = out;
+            char* seam[MSG_PARTS_MAX];
+            int   seamCount = 0;
+
+            s_MsgPtrs[usIdx] = start;
+
+            for (p = 0; p < parts && srcIdx < srcCount; p++, srcIdx++)
+            {
+                if (p > 0)
+                {
+                    /* Re-open after the previous part's NUL with a line break. */
+                    out = out - 1;
+                    if (seamCount < MSG_PARTS_MAX)
+                    {
+                        seam[seamCount++] = out;
+                    }
+                    *out++ = '~';
+                    *out++ = 'N';
+                    *out++ = ' ';
+                }
+                out = TranslateMapMsg(out, bytes + srcPtrs[srcIdx], p == parts - 1);
+            }
+
+            if (seamCount != 0)
+            {
+                /* Retail shows these parts as separate pages; joining them is what
+                 * keeps the compiled maps' message indices resolving. When the join
+                 * does not fit one rendered page, promote the seams back to page
+                 * breaks so each part lands on retail's own boundary — otherwise the
+                 * renderer has to break mid-part at the line cap. */
+                if (MsgLineCount(start) > g_PcMapMsgLineMax)
+                {
+                    for (p = 0; p < seamCount; p++)
+                    {
+                        seam[p][1] = MAP_MSG_CODE_PAGE;
+                    }
+                }
+                out = start + strlen(start) + 1;
+            }
+        }
+    }
+
+    for (; usIdx < MSG_COUNT_MAX; usIdx++)
+    {
+        s_MsgPtrs[usIdx] = "";
+    }
+
+    /* A pack's story text, laid over whatever the walk above produced -- the
+     * disc's own English (a pack clamps the file redirect to English), which
+     * doubles as the count discovery and the untranslated-line fallback.
+     * Overlay the pack's translations, keyed by the same US message index the
+     * split logic just resolved. Pack strings outlive this call (owned by
+     * lang_pack), so pointing straight at them is safe. */
+    if (Pc_LangPackActive())
+    {
+        int replaced = 0;
+
+        for (usIdx = 0; usIdx < MSG_COUNT_MAX; usIdx++)
+        {
+            const char* tr = Pc_LangPackMapMsg(mapIdx, usIdx);
+
+            if (tr != NULL)
+            {
+                s_MsgPtrs[usIdx] = tr;
+                replaced++;
+            }
+        }
+        s_StatPackMsgs = replaced;
+        SH_LOG("[LANG] map %d: %d pack messages overlaid (%s)", mapIdx, replaced,
+               Pc_LangIdForSlot(g_PcConfig.language));
+    }
+
+    s_LangMapHeader             = *g_pMapOverlayHeader;
+    s_LangMapHeader.mapMessages = s_MsgPtrs;
+    g_pMapOverlayHeader         = &s_LangMapHeader;
+
+    s_StatMapIdx   = mapIdx;
+    s_StatSrcCount = srcCount;
+    SH_LOG("[LANG] map %d: %d localized messages installed (lang %d)", mapIdx, srcCount, g_PcConfig.language);
+}
+
+/* ------------------------------------------------------------------ */
+/* Mod text overrides — gamedata/load/text_overrides.txt               */
+/* ------------------------------------------------------------------ */
+/* A minimal moddable per-message replacement. One entry per line:
+ *     map0_s00.18 = Ah shit, ~N here we go again.
+ * (key = the extractor's [MAPn_Snn.idx] lowercased; '#' comments, blank
+ * lines ignored.) The map message's original leading ~J timing cue and a
+ * trailing ~E are kept automatically, so a replacement stays voice-synced;
+ * '_' and ' ' both render as a space and '~N' is a line break. Applied AFTER
+ * any localization swap so it wins for every region; an absent file is a
+ * no-op. This is the seed of a fuller mod text system (menus/items, the
+ * localization-doc format) tracked separately.
+ *
+ * SEVERAL text mods can be installed at once, so the entries are gathered from
+ * every file rather than one: the player's own gamedata/load/text_overrides.txt
+ * first, then every gamedata/load/text_overrides/<name>.txt in name order. The
+ * FIRST file to name a message wins it, and the Mod Manager writes one file per
+ * mod named <priority>_<mod>.txt, so a plain name sort reproduces the mod list's
+ * own order and the mod on top wins a conflict. Mods that touch different lines
+ * simply all apply. */
+
+#define TEXT_OVR_MAX       512
+#define TEXT_OVR_FILES_MAX 64
+
+typedef struct {
+    short mapIdx;
+    short msgIdx;
+    char* userText; /* raw replacement from the file */
+    char* built;    /* engine-format (prefix + converted + ~E), lazily built */
+} s_TextOverride;
+
+static s_TextOverride  s_TextOvr[TEXT_OVR_MAX];
+static int             s_TextOvrCount = -1; /* -1 = not loaded yet */
+static const char*     s_ModMsgs[MSG_COUNT_MAX];
+
+extern int MapRegistry_FindByName(const char* name);
+extern int Pc_MapMsgCount(int mapIdx);
+
+/* ASCII case-insensitive compare (strcasecmp is not portable across the
+ * port's three toolchains). */
+static int TextOvrStrCaseCmp(const char* a, const char* b)
+{
+    for (;; a++, b++)
+    {
+        int ca = (*a >= 'A' && *a <= 'Z') ? (*a + 32) : (int)(unsigned char)*a;
+        int cb = (*b >= 'A' && *b <= 'Z') ? (*b + 32) : (int)(unsigned char)*b;
+
+        if (ca != cb || ca == 0)
+            return ca - cb;
+    }
+}
+
+/* Add one file's entries to the table. A message an earlier file already
+ * claimed is skipped, which is what makes the first file win a conflict.
+ * Returns the number added, or -1 when there is no such file. */
+static int TextOverridesLoadFile(const char* path)
+{
+    FILE* f;
+    char  line[512];
+    int   added = 0;
+
+    f = fopen(path, "rb");
+    if (f == NULL)
+        return -1;
+
+    while (fgets(line, sizeof(line), f) != NULL && s_TextOvrCount < TEXT_OVR_MAX)
+    {
+        char* p = line;
+        char* eq;
+        char* dot;
+        char* key;
+        char* val;
+        char* end;
+        char* c;
+        int   mapIdx;
+        int   msgIdx;
+
+        while (*p == ' ' || *p == '\t')
+            p++;
+        if (*p == '#' || *p == '\0' || *p == '\r' || *p == '\n')
+            continue;
+
+        eq = strchr(p, '=');
+        if (eq == NULL)
+            continue;
+        *eq = '\0';
+        key = p;
+        val = eq + 1;
+
+        for (end = eq - 1; end >= key && (*end == ' ' || *end == '\t'); end--)
+            *end = '\0';
+
+        dot = strrchr(key, '.');
+        if (dot == NULL)
+            continue;
+        *dot = '\0';
+        msgIdx = atoi(dot + 1);
+        for (c = key; *c != '\0'; c++)
+            if (*c >= 'A' && *c <= 'Z')
+                *c = (char)(*c + 32);
+        mapIdx = MapRegistry_FindByName(key);
+        if (mapIdx < 0 || msgIdx < 0)
+            continue;
+
+        while (*val == ' ' || *val == '\t')
+            val++;
+        for (end = val + strlen(val) - 1;
+             end >= val && (*end == '\r' || *end == '\n' || *end == ' ' || *end == '\t'); end--)
+            *end = '\0';
+
+        {
+            int dup = 0;
+            int i;
+
+            for (i = 0; i < s_TextOvrCount; i++)
+            {
+                if (s_TextOvr[i].mapIdx == (short)mapIdx && s_TextOvr[i].msgIdx == (short)msgIdx)
+                {
+                    dup = 1;
+                    break;
+                }
+            }
+            if (dup)
+                continue; /* a higher-priority file already replaced this line */
+        }
+
+        s_TextOvr[s_TextOvrCount].mapIdx   = (short)mapIdx;
+        s_TextOvr[s_TextOvrCount].msgIdx   = (short)msgIdx;
+        s_TextOvr[s_TextOvrCount].userText = _strdup(val);
+        s_TextOvr[s_TextOvrCount].built    = NULL;
+        s_TextOvrCount++;
+        added++;
+    }
+    fclose(f);
+    return added;
+}
+
+static void TextOverridesLoad(void)
+{
+    DIR*           d;
+    struct dirent* e;
+    char*          names[TEXT_OVR_FILES_MAX];
+    char           path[768];
+    int            n     = 0;
+    int            files = 0;
+    int            added;
+    int            i;
+    int            j;
+
+    s_TextOvrCount = 0;
+
+    /* The player's own file outranks the mods: it is a deliberate hand edit. */
+    added = TextOverridesLoadFile("gamedata/load/text_overrides.txt");
+    if (added >= 0)
+    {
+        files++;
+        SH_LOG("[MODTEXT] text_overrides.txt: %d override(s)", added);
+    }
+
+    d = opendir("gamedata/load/text_overrides");
+    if (d != NULL)
+    {
+        while ((e = readdir(d)) != NULL && n < TEXT_OVR_FILES_MAX)
+        {
+            size_t len = strlen(e->d_name);
+
+            if (len < 5 || TextOvrStrCaseCmp(e->d_name + len - 4, ".txt") != 0)
+                continue;
+
+            names[n] = _strdup(e->d_name);
+            if (names[n] != NULL)
+                n++;
+        }
+        closedir(d);
+
+        /* Name order = the Mod Manager's priority order (it numbers the files). */
+        for (i = 1; i < n; i++)
+        {
+            char* key = names[i];
+
+            for (j = i - 1; j >= 0 && TextOvrStrCaseCmp(names[j], key) > 0; j--)
+                names[j + 1] = names[j];
+            names[j + 1] = key;
+        }
+
+        for (i = 0; i < n; i++)
+        {
+            snprintf(path, sizeof(path), "gamedata/load/text_overrides/%s", names[i]);
+            added = TextOverridesLoadFile(path);
+            if (added >= 0)
+            {
+                files++;
+                SH_LOG("[MODTEXT] %s: %d override(s)", names[i], added);
+            }
+            free(names[i]);
+        }
+    }
+
+    SH_LOG("[MODTEXT] loaded %d text override(s) from %d file(s)", s_TextOvrCount, files);
+}
+
+/* Keep orig's leading ~J..(..) timing prefix (+ following whitespace), then the
+ * user text (space -> '_', '~N' etc. pass through), then orig's own terminator.
+ *
+ * The terminator has to be copied rather than assumed: a message WITHOUT a ~E
+ * is a chain page, and the engine walks on to the next index when it finishes
+ * (Gfx_MapMsg_Draw's g_MapMsg_CurrentIdx++). Ending every override with ~E
+ * closed the whole conversation at its first page, so a cutscene whose lines
+ * were blanked (the NoSubs mod) ran its opening line and then jumped straight
+ * to the end -- 119 of its 295 lines are chain pages, including all of the
+ * cafe scene. */
+static char* TextOverrideBuild(const char* orig, const char* userText)
+{
+    char        prefix[64];
+    int         pl = 0;
+    const char* s  = orig;
+    const char* u;
+    char*       out;
+    char*       o;
+    int         hasEnd = 0;
+
+    for (u = orig; u != NULL && u[0] != '\0'; u++)
+    {
+        if (u[0] == '~' && u[1] == 'E')
+        {
+            hasEnd = 1;
+            break;
+        }
+    }
+
+    if (s != NULL && s[0] == '~' && s[1] != '\0')
+    {
+        prefix[pl++] = *s++; /* ~ */
+        prefix[pl++] = *s++; /* code letter, e.g. J */
+        /* Copy any parameter chars between the code letter and the '(' timing
+         * group. The PSX format is ~J0(2.5) — a page/variant digit sits before
+         * the paren, NOT ~J(2.5). The old code checked for '(' immediately after
+         * the letter, so it dropped the "0(2.5)\t" entirely and produced a bare
+         * "~J<text>" the map-message timer couldn't parse — the override showed
+         * nothing. Capture up to the '(' (or whitespace / next code / end). */
+        while (*s != '\0' && *s != '(' && *s != ' ' && *s != '\t' && *s != '~' &&
+               pl < (int)sizeof(prefix) - 2)
+            prefix[pl++] = *s++;
+        if (*s == '(')
+        {
+            while (*s != '\0' && *s != ')' && pl < (int)sizeof(prefix) - 2)
+                prefix[pl++] = *s++;
+            if (*s == ')')
+                prefix[pl++] = *s++;
+        }
+        while ((*s == '\t' || *s == ' ') && pl < (int)sizeof(prefix) - 1)
+            prefix[pl++] = *s++;
+    }
+
+    out = (char*)malloc((size_t)pl + strlen(userText) + 8);
+    if (out == NULL)
+        return NULL;
+    o = out;
+    memcpy(o, prefix, (size_t)pl);
+    o += pl;
+    for (u = userText; *u != '\0'; u++)
+        *o++ = (*u == ' ') ? '_' : *u;
+    *o++ = ' ';
+    if (hasEnd)
+    {
+        *o++ = '~';
+        *o++ = 'E';
+        *o++ = ' ';
+    }
+    *o   = '\0';
+    return out;
+}
+
+void Pc_TextOverrideApply(int mapIdx)
+{
+    const char** src;
+    int          count;
+    int          i;
+    int          any = 0;
+
+    if (s_TextOvrCount < 0)
+        TextOverridesLoad();
+    if (s_TextOvrCount == 0 || g_pMapOverlayHeader == NULL)
+        return;
+
+    for (i = 0; i < s_TextOvrCount; i++)
+    {
+        if (s_TextOvr[i].mapIdx == mapIdx)
+        {
+            any = 1;
+            break;
+        }
+    }
+    if (!any)
+        return;
+
+    src = (const char**)g_pMapOverlayHeader->mapMessages;
+    if (src == NULL)
+        return;
+
+    /* Repoint to a static copy rather than writing the live array: on a vanilla
+     * USA disc it is the compiled MAP_MESSAGES in read-only rodata. Bound the
+     * copy by the map's real message count so it never reads past the array. */
+    count = Pc_MapMsgCount(mapIdx);
+    if (count <= 0 || count > MSG_COUNT_MAX)
+        return;
+
+    for (i = 0; i < count; i++)
+        s_ModMsgs[i] = src[i];
+
+    for (i = 0; i < s_TextOvrCount; i++)
+    {
+        s_TextOverride* o = &s_TextOvr[i];
+
+        if (o->mapIdx != mapIdx || o->msgIdx < 0 || o->msgIdx >= count)
+            continue;
+        if (o->built == NULL)
+            o->built = TextOverrideBuild(src[o->msgIdx], o->userText);
+        if (o->built != NULL)
+            s_ModMsgs[o->msgIdx] = o->built;
+    }
+
+    s_ModMapHeader             = *g_pMapOverlayHeader;
+    s_ModMapHeader.mapMessages = s_ModMsgs;
+    g_pMapOverlayHeader        = &s_ModMapHeader;
+
+    SH_LOG("[MODTEXT] map %d: text override(s) applied", mapIdx);
+}
+
+/* One line per layer of the current language, for the LANGCHECK command. */
+void Pc_LangSelfCheck(void (*out)(const char*, ...))
+{
+    static const char* const fonts[] = { "latin", "polish", "cyrillic", "sjis" };
+    int   font = Pc_LangPackActive() ? Pc_LangPackFont() : -1;
+    int   slot = Pc_LangSlotCurrent();
+
+    out("language %s  (slot %d of %d: %s)", Pc_LangIdForSlot(g_PcConfig.language),
+        slot, Pc_LangSlotCount(), Pc_LangSlotName(slot));
+    out("  disc      %s", g_GameRegion == Region_EUR ? "PAL"
+                        : g_GameRegion == Region_JPN ? "NTSC-J" : "NTSC-U");
+    out("  pack      %s%s%s", Pc_LangPackActive() ? "loaded, font " : "none",
+        Pc_LangPackActive() ? ((font >= 0 && font <= 3) ? fonts[font] : "?") : "",
+        (!Pc_LangPackActive() && g_PcConfig.language == LANG_EN_US)
+            ? " (compiled US text)" : "");
+    if (s_StatMapIdx < 0)
+        out("  story     no map loaded yet - check this in-game");
+    else
+        out("  story     map %d: %d messages, %d from the pack%s", s_StatMapIdx,
+            s_StatSrcCount, s_StatPackMsgs,
+            (Pc_LangPackActive() && s_StatPackMsgs == 0) ? "  <-- PACK TEXT MISSING" : "");
+    out("  item text %s", (s_ItemPool != NULL) ? "installed from disc" : "compiled");
+    out("  font      %s%s", Pc_LangSjisActive() ? "Shift-JIS" : "atlas",
+        Font_HiresGridLive() ? ", PAL grid via pinned override" : "");
+}

@@ -1,0 +1,262 @@
+{
+  "status": "PASS",
+  "execution": "Focused ARM checks of newly linked chapter tables and compatibility glue.\n\nSynthetic nearby states, original disc DATA and original retail routines. This\ndoes not simulate a continuous playthrough, graphics, audio or movie decoding.\n",
+  "checks": [
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map2_s00",
+      "events": 200,
+      "uses": 9,
+      "transitions": 17
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map2_s01",
+      "events": 27,
+      "uses": 0,
+      "transitions": 1
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map2_s02",
+      "events": 41,
+      "uses": 1,
+      "transitions": 8
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map2_s04",
+      "events": 27,
+      "uses": 0,
+      "transitions": 2
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map2_s00",
+      "item": "InvItemId_KGordonKey",
+      "event": 95,
+      "result": [
+        0,
+        71,
+        20,
+        95
+      ]
+    },
+    {
+      "case": "original_kgordon_consumption_unlock_and_map_mark",
+      "result": [
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map2_s00",
+      "item": "InvItemId_DrawbridgeKey",
+      "event": 124,
+      "result": [
+        0,
+        72,
+        21,
+        124
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map2_s02",
+      "item": "InvItemId_AntiqueShopKey",
+      "event": 10,
+      "result": [
+        0,
+        76,
+        2,
+        10
+      ]
+    },
+    {
+      "case": "original_church_pickup_flag_and_inventory_grant",
+      "event": 3,
+      "item": 100
+    },
+    {
+      "case": "original_declined_pickup_clears_flag_without_grant",
+      "event": 3
+    },
+    {
+      "case": "original_church_pickup_flag_and_inventory_grant",
+      "event": 4,
+      "item": 72
+    },
+    {
+      "case": "original_declined_pickup_clears_flag_without_grant",
+      "event": 4
+    },
+    {
+      "case": "original_fmv_M6_call_and_return_flag_181",
+      "file": 2060,
+      "decoder": "external Native-FMV checkpoint"
+    },
+    {
+      "case": "original_dahlia_scene_completion_control_and_flags",
+      "start_step": 32,
+      "start_skip": false,
+      "result": [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "original_dahlia_scene_completion_control_and_flags",
+      "start_step": 10,
+      "start_skip": true,
+      "result": [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "original_drawbridge_key_state_timed_motion_and_completion",
+      "ticks": 142,
+      "result": [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "case": "original_drawbridge_decline_does_not_open",
+      "alternate": 0
+    },
+    {
+      "case": "original_drawbridge_decline_does_not_open",
+      "alternate": 1
+    },
+    {
+      "case": "animation_binary_equivalence_and_native_calls",
+      "map": "map2_s01",
+      "symbol": "DAHLIA_ANIM_INFOS",
+      "entries": 52
+    },
+    {
+      "case": "animation_binary_equivalence_and_native_calls",
+      "map": "map2_s02",
+      "symbol": "ROMPER_ANIM_INFOS",
+      "entries": 44
+    },
+    {
+      "case": "harry_grab_animation_duration_native_function_pointers",
+      "entries": [
+        17,
+        21
+      ]
+    },
+    {
+      "case": "original_romper_damage_death_state",
+      "difficulty": 0,
+      "first": [
+        1850935,
+        1441335,
+        6
+      ],
+      "last": [
+        1852328,
+        0,
+        7,
+        8,
+        4294967295,
+        0
+      ],
+      "limitation": "Synthetic damage packets and floor; full movement/aiming/grab geometry need integrated playthrough"
+    },
+    {
+      "case": "original_romper_damage_death_state",
+      "difficulty": 1,
+      "first": [
+        3521250,
+        3111650,
+        6
+      ],
+      "last": [
+        2913750,
+        0,
+        7,
+        8,
+        4294967295,
+        0
+      ],
+      "limitation": "Synthetic damage packets and floor; full movement/aiming/grab geometry need integrated playthrough"
+    },
+    {
+      "case": "original_romper_damage_death_state",
+      "difficulty": 2,
+      "first": [
+        2992050,
+        2582450,
+        6
+      ],
+      "last": [
+        3443850,
+        0,
+        7,
+        8,
+        4294967295,
+        0
+      ],
+      "limitation": "Synthetic damage packets and floor; full movement/aiming/grab geometry need integrated playthrough"
+    },
+    {
+      "case": "original_save_record_checksum_inventory_flags_and_enemy_state_roundtrip",
+      "map": 10,
+      "phase": 0
+    },
+    {
+      "case": "bridge_geometry_reconstructed_from_original_saved_flag",
+      "phase": 0,
+      "angle": -568
+    },
+    {
+      "case": "original_save_record_checksum_inventory_flags_and_enemy_state_roundtrip",
+      "map": 11,
+      "phase": 1
+    },
+    {
+      "case": "original_save_record_checksum_inventory_flags_and_enemy_state_roundtrip",
+      "map": 10,
+      "phase": 2
+    },
+    {
+      "case": "bridge_geometry_reconstructed_from_original_saved_flag",
+      "phase": 2,
+      "angle": 0
+    },
+    {
+      "case": "original_save_record_checksum_inventory_flags_and_enemy_state_roundtrip",
+      "map": 12,
+      "phase": 2
+    },
+    {
+      "case": "original_save_record_checksum_inventory_flags_and_enemy_state_roundtrip",
+      "map": 14,
+      "phase": 2
+    }
+  ],
+  "elf_sha256": "4c4a681a007fa3dca1b10a784efcaff0bab6f46d9bf6a46221158b04e3e5bf8f",
+  "hardware_accepted": false,
+  "full_playthrough": false,
+  "original_memcard_written": false,
+  "fmv_decoding_tested_here": false
+}

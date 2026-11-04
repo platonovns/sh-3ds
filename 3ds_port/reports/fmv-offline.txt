@@ -1,0 +1,22 @@
+C1_20670 frames=2067 default_limit=2060 compared=3 decode_ms=3.3340 fps=299.94 rgb_crc=1ed69784 pcm_crc=c0044961 pcm_frames=5208840 audio=2563 silent=20
+C2_20670 frames=2067 default_limit=2060 compared=3 decode_ms=15.2597 fps=65.53 rgb_crc=1ed69784 pcm_crc=c0044961 pcm_frames=5208840 audio=2563 silent=20
+M1_03500 frames=350 default_limit=338 compared=3 decode_ms=5.8963 fps=169.60 rgb_crc=9e71da76 pcm_crc=ab1abbea pcm_frames=882000 audio=437 silent=0
+M2_01190 frames=119 default_limit=112 compared=3 decode_ms=9.3533 fps=106.91 rgb_crc=266590f8 pcm_crc=b18b97d1 pcm_frames=299880 audio=19 silent=129
+M3_02570 frames=257 default_limit=250 compared=3 decode_ms=5.9883 fps=166.99 rgb_crc=b7e189e0 pcm_crc=0af8aa46 pcm_frames=647640 audio=305 silent=16
+M4_02490 frames=249 default_limit=241 compared=3 decode_ms=4.8660 fps=205.51 rgb_crc=c503a2c4 pcm_crc=1ff0bbda pcm_frames=627480 audio=290 silent=21
+M5_03140 frames=314 default_limit=306 compared=3 decode_ms=4.2330 fps=236.24 rgb_crc=e5d1c155 pcm_crc=f596ac40 pcm_frames=791280 audio=383 silent=9
+M6_02112 frames=209 default_limit=201 compared=3 decode_ms=4.8987 fps=204.14 rgb_crc=44532793 pcm_crc=1542239e pcm_frames=526680 audio=262 silent=0
+M7_01536 frames=150 default_limit=142 compared=3 decode_ms=8.3753 fps=119.40 rgb_crc=22e56bdc pcm_crc=00edccb5 pcm_frames=378000 audio=188 silent=0
+M8_03039 frames=304 default_limit=296 compared=3 decode_ms=3.9160 fps=255.36 rgb_crc=8542a550 pcm_crc=5853b484 pcm_frames=766080 audio=349 silent=30
+M9_01730 frames=173 default_limit=165 compared=3 decode_ms=4.5887 fps=217.93 rgb_crc=c2a6cec4 pcm_crc=e5826fe1 pcm_frames=435960 audio=210 silent=6
+MA_03590 frames=359 default_limit=351 compared=3 decode_ms=3.1820 fps=314.27 rgb_crc=2682cea0 pcm_crc=3f935815 pcm_frames=904680 audio=439 silent=9
+MB_04850 frames=485 default_limit=477 compared=3 decode_ms=2.2827 fps=438.08 rgb_crc=56a4fff5 pcm_crc=565a09b5 pcm_frames=1222200 audio=594 silent=12
+MC_01930 frames=193 default_limit=185 compared=3 decode_ms=4.6093 fps=216.95 rgb_crc=4b3d2958 pcm_crc=c83f391c pcm_frames=486360 audio=234 silent=7
+MD_03780 frames=378 default_limit=371 compared=3 decode_ms=4.2900 fps=233.10 rgb_crc=1e718d17 pcm_crc=3c1dff0c pcm_frames=952560 audio=472 silent=0
+ME_03300 frames=330 default_limit=322 compared=3 decode_ms=4.8073 fps=208.02 rgb_crc=c703e16a pcm_crc=1c76929a pcm_frames=831600 audio=398 silent=14
+Z1_16180 frames=1618 default_limit=1611 compared=3 decode_ms=7.5560 fps=132.35 rgb_crc=c28687f7 pcm_crc=68f65e37 pcm_frames=4077360 audio=2018 silent=4
+Z3_02340 frames=234 default_limit=226 compared=3 decode_ms=4.4147 fps=226.52 rgb_crc=3c47ee38 pcm_crc=f7c4501f pcm_frames=589680 audio=270 silent=22
+Z4_01590 frames=159 default_limit=151 compared=3 decode_ms=5.1840 fps=192.90 rgb_crc=592d9468 pcm_crc=ba84379f pcm_frames=400680 audio=180 silent=18
+ZC_14392 frames=1421 default_limit=1414 compared=3 decode_ms=10.4520 fps=95.68 rgb_crc=86906859 pcm_crc=6c929460 pcm_frames=3580920 audio=1777 silent=0
+ZZ_14239 frames=1424 default_limit=1412 compared=3 decode_ms=12.7960 fps=78.15 rgb_crc=449862b1 pcm_crc=84b53eed pcm_frames=3588480 audio=1754 silent=25
+malformed_vlc=1000 PASS

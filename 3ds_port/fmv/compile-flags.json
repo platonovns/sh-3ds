@@ -1,0 +1,5 @@
+{
+  "engine": "-g -O2 -Wall -Wextra -Werror=implicit-function-declaration -Werror=incompatible-pointer-types -fno-strict-aliasing -fwrapv -fsigned-char -fno-short-enums -mno-unaligned-access -mword-relocations -ffunction-sections -fdata-sections -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -I{ROOT}/3ds_port/include -I{ROOT}/3ds_port/build/psycross/include/psx -I{ROOT}/3ds_port/build/psycross/include -I{ROOT}/3ds_port/../pc_port/include -I{ROOT}/3ds_port/../pc_port/include/psyq_compat -I{ROOT}/3ds_port/../include -I{ROOT}/3ds_port/../include/decomp -I{ROOT}/3ds_port/../pc_port/PsyCross/include/psx -I{ROOT}/3ds_port/../pc_port/PsyCross/include -include {ROOT}/3ds_port/include/engine_profile.h -std=gnu11 -DSH_3DS_GAME=1 -DSH_3DS_LEVEL_B=1",
+  "sdk": "-g -O2 -std=gnu11 -Wall -Wextra -Werror -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -mno-unaligned-access -ffunction-sections -fdata-sections -D__3DS__ -DSH_3DS_GAME=1 -I{ROOT}/3ds_port/include -I{ROOT}/3ds_port/build -I{SDK}/libctru/include",
+  "origin": "Stage 11A starting-source.zip"
+}

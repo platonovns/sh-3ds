@@ -1,0 +1,2335 @@
+[
+  {
+    "id": 2053,
+    "name": "C1_20670",
+    "lba": 133127,
+    "sectors": 20670,
+    "limit": 2067,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 2067,
+    "first_frame": 1,
+    "last_frame": 2067,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 137.8,
+    "kinds": {
+      "video": 18087,
+      "audio": 2563,
+      "padding": 20
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 2563
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 2562
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15988,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        2066,
+        20650,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2067,
+        20660,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/screens/stream/stream.c",
+        "call": "MovieIntro/default"
+      },
+      {
+        "source": "src/screens/stream/stream.c",
+        "call": "MovieIntroAlternate",
+        "limit": 2060
+      }
+    ]
+  },
+  {
+    "id": 2054,
+    "name": "C2_20670",
+    "lba": 153797,
+    "sectors": 20670,
+    "limit": 2067,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 2067,
+    "first_frame": 1,
+    "last_frame": 2067,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 137.8,
+    "kinds": {
+      "video": 18087,
+      "audio": 2563,
+      "padding": 20
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 2563
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 2562
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15988,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        2066,
+        20650,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2067,
+        20660,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/screens/stream/stream.c",
+        "call": "MovieIntro/extra option"
+      }
+    ]
+  },
+  {
+    "id": 2055,
+    "name": "M1_03500",
+    "lba": 174467,
+    "sectors": 3500,
+    "limit": 345,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 350,
+    "first_frame": 1,
+    "last_frame": 350,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 23.3333,
+    "kinds": {
+      "video": 3063,
+      "audio": 437
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 437
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 436
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15636,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        349,
+        3480,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        350,
+        3490,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/screens/stream/stream.c",
+        "call": "MovieOpening/New Game"
+      }
+    ]
+  },
+  {
+    "id": 2056,
+    "name": "M2_01190",
+    "lba": 177967,
+    "sectors": 1190,
+    "limit": 119,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 119,
+    "first_frame": 1,
+    "last_frame": 119,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 7.9333,
+    "kinds": {
+      "video": 1042,
+      "audio": 19,
+      "padding": 129
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 19
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 18
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15984,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        15200,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        15212,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        15180,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        15220,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        118,
+        1170,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        119,
+        1180,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map0_s00/map0_s00_events_data.c",
+        "event_param": 16
+      }
+    ]
+  },
+  {
+    "id": 2057,
+    "name": "M3_02570",
+    "lba": 179157,
+    "sectors": 2570,
+    "limit": 257,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 257,
+    "first_frame": 1,
+    "last_frame": 257,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 17.1333,
+    "kinds": {
+      "video": 2249,
+      "audio": 305,
+      "padding": 16
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 305
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 304
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15728,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2744,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        256,
+        2550,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        257,
+        2560,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map0_s01/map0_s01_events_data.c",
+        "event_param": 15
+      }
+    ]
+  },
+  {
+    "id": 2058,
+    "name": "M4_02490",
+    "lba": 181727,
+    "sectors": 2490,
+    "limit": 248,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 249,
+    "first_frame": 1,
+    "last_frame": 249,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 16.6,
+    "kinds": {
+      "video": 2179,
+      "audio": 290,
+      "padding": 21
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 290
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 289
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15480,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2952,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2980,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        248,
+        2470,
+        8,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        249,
+        2480,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map1_s06/map1_s06_events_data.c",
+        "event_param": 14
+      }
+    ]
+  },
+  {
+    "id": 2059,
+    "name": "M5_03140",
+    "lba": 184217,
+    "sectors": 3140,
+    "limit": 313,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 314,
+    "first_frame": 1,
+    "last_frame": 314,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 20.9333,
+    "kinds": {
+      "video": 2748,
+      "audio": 383,
+      "padding": 9
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 383
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 382
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15852,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        313,
+        3120,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        314,
+        3130,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map3_s00/map3_s00_events_data.c",
+        "event_param": 13
+      }
+    ]
+  },
+  {
+    "id": 2060,
+    "name": "M6_02112",
+    "lba": 187357,
+    "sectors": 2112,
+    "limit": 208,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 209,
+    "first_frame": 1,
+    "last_frame": 209,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 13.9333,
+    "kinds": {
+      "video": 1829,
+      "audio": 264,
+      "padding": 19
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 264
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 263
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15904,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2940,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        3436,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        4004,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        208,
+        2070,
+        8,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        209,
+        2080,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map2_s01/map2_s01_events_data.c",
+        "event_param": 12
+      }
+    ]
+  },
+  {
+    "id": 2061,
+    "name": "M7_01536",
+    "lba": 189469,
+    "sectors": 1536,
+    "limit": 149,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 150,
+    "first_frame": 1,
+    "last_frame": 150,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 10.0,
+    "kinds": {
+      "video": 1313,
+      "audio": 192,
+      "padding": 31
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 192
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 191
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15964,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        14676,
+        320,
+        208,
+        3,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        15600,
+        320,
+        208,
+        3,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        15220,
+        320,
+        208,
+        4,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        14876,
+        320,
+        208,
+        5,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        149,
+        1480,
+        9,
+        14984,
+        320,
+        208,
+        5,
+        2
+      ],
+      [
+        150,
+        1490,
+        9,
+        14984,
+        320,
+        208,
+        5,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map4_s03/map4_s03_events_data.c",
+        "event_param": 11
+      }
+    ]
+  },
+  {
+    "id": 2062,
+    "name": "M8_03039",
+    "lba": 191005,
+    "sectors": 3039,
+    "limit": 303,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 304,
+    "first_frame": 1,
+    "last_frame": 304,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 20.2667,
+    "kinds": {
+      "video": 2660,
+      "audio": 349,
+      "padding": 30
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 349
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 348
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15984,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        3148,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        303,
+        3020,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        304,
+        3030,
+        8,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map3_s04/map3_s04_events_data.c",
+        "event_param": 10
+      }
+    ]
+  },
+  {
+    "id": 2063,
+    "name": "M9_01730",
+    "lba": 194044,
+    "sectors": 1730,
+    "limit": 172,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 173,
+    "first_frame": 1,
+    "last_frame": 173,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 11.5333,
+    "kinds": {
+      "video": 1514,
+      "audio": 210,
+      "padding": 6
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 210
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 209
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15988,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        172,
+        1710,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        173,
+        1720,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map6_s03/map6_s03_events_data.c",
+        "event_param": 9
+      }
+    ]
+  },
+  {
+    "id": 2064,
+    "name": "MA_03590",
+    "lba": 195774,
+    "sectors": 3590,
+    "limit": 358,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 359,
+    "first_frame": 1,
+    "last_frame": 359,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 23.9333,
+    "kinds": {
+      "video": 3142,
+      "audio": 439,
+      "padding": 9
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 439
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 438
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15200,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        358,
+        3570,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        359,
+        3580,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map6_s04/map6_s04_events_data.c",
+        "event_param": 8
+      }
+    ]
+  },
+  {
+    "id": 2065,
+    "name": "MB_04850",
+    "lba": 199364,
+    "sectors": 4850,
+    "limit": 484,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 485,
+    "first_frame": 1,
+    "last_frame": 485,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 32.3333,
+    "kinds": {
+      "video": 4244,
+      "audio": 594,
+      "padding": 12
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 594
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 593
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15996,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        484,
+        4830,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        485,
+        4840,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map6_s04/map6_s04_events_data.c",
+        "event_param": 7
+      }
+    ]
+  },
+  {
+    "id": 2066,
+    "name": "MC_01930",
+    "lba": 204214,
+    "sectors": 1930,
+    "limit": 192,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 193,
+    "first_frame": 1,
+    "last_frame": 193,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 12.8667,
+    "kinds": {
+      "video": 1689,
+      "audio": 234,
+      "padding": 7
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 234
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 233
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 14652,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2944,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2944,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        192,
+        1910,
+        8,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        193,
+        1920,
+        9,
+        2944,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map7_s00/map7_s00_events_data.c",
+        "event_param": 6
+      }
+    ]
+  },
+  {
+    "id": 2067,
+    "name": "MD_03780",
+    "lba": 206144,
+    "sectors": 3780,
+    "limit": 378,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 378,
+    "first_frame": 1,
+    "last_frame": 378,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 25.2,
+    "kinds": {
+      "video": 3308,
+      "audio": 472
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 472
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 471
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15900,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        3040,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        3040,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        3040,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        377,
+        3760,
+        9,
+        3040,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        378,
+        3770,
+        9,
+        3044,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map7_s01/map7_s01_events_data.c",
+        "event_param": 5
+      },
+      {
+        "source": "src/maps/map7_s02/map7_s02_events_data.c",
+        "event_param": 5
+      }
+    ]
+  },
+  {
+    "id": 2068,
+    "name": "ME_03300",
+    "lba": 209924,
+    "sectors": 3300,
+    "limit": 329,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 330,
+    "first_frame": 1,
+    "last_frame": 330,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 22.0,
+    "kinds": {
+      "video": 2888,
+      "audio": 398,
+      "padding": 14
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 398
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 397
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15948,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2940,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2944,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        329,
+        3280,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        330,
+        3290,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map7_s03/map7_s03_events_data.c",
+        "event_param": 4
+      }
+    ]
+  },
+  {
+    "id": 2069,
+    "name": "Z1_16180",
+    "lba": 213224,
+    "sectors": 16180,
+    "limit": 1618,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 1618,
+    "first_frame": 1,
+    "last_frame": 1618,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 107.8667,
+    "kinds": {
+      "video": 14158,
+      "audio": 2018,
+      "padding": 4
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 2018
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 2017
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 16000,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2888,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2880,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        3736,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        6028,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        1617,
+        16160,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        1618,
+        16170,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map7_s03/map7_s03_events_data.c",
+        "event_param": 3
+      }
+    ]
+  },
+  {
+    "id": 2070,
+    "name": "Z3_02340",
+    "lba": 229404,
+    "sectors": 2340,
+    "limit": 233,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 234,
+    "first_frame": 1,
+    "last_frame": 234,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 15.6,
+    "kinds": {
+      "video": 2048,
+      "audio": 270,
+      "padding": 22
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 270
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 269
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 13560,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        233,
+        2320,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        234,
+        2330,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map7_s03/map7_s03_events_data.c",
+        "event_param": 2
+      }
+    ]
+  },
+  {
+    "id": 2071,
+    "name": "Z4_01590",
+    "lba": 231744,
+    "sectors": 1590,
+    "limit": 158,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 159,
+    "first_frame": 1,
+    "last_frame": 159,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 10.6,
+    "kinds": {
+      "video": 1392,
+      "audio": 180,
+      "padding": 18
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 180
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 179
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15964,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        2984,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        3208,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        158,
+        1570,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        159,
+        1580,
+        9,
+        2948,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map7_s03/map7_s03_events_data.c",
+        "event_param": 1
+      }
+    ]
+  },
+  {
+    "id": 2072,
+    "name": "ZC_14392",
+    "lba": 233334,
+    "sectors": 14392,
+    "limit": 1421,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 1421,
+    "first_frame": 1,
+    "last_frame": 1421,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 94.7333,
+    "kinds": {
+      "video": 12434,
+      "audio": 1799,
+      "padding": 159
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 1799
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 1798
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 16000,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        15856,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        10236,
+        320,
+        208,
+        2,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        10548,
+        320,
+        208,
+        2,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        10176,
+        320,
+        208,
+        2,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        1420,
+        14190,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        1421,
+        14200,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": [
+      {
+        "source": "src/maps/map7_s03/map7_s03_events_data.c",
+        "event_param": 0
+      }
+    ]
+  },
+  {
+    "id": 2073,
+    "name": "ZZ_14239",
+    "lba": 247726,
+    "sectors": 14239,
+    "limit": 1419,
+    "dimensions_versions": [
+      [
+        320,
+        208,
+        2
+      ]
+    ],
+    "frames": 1424,
+    "first_frame": 1,
+    "last_frame": 1424,
+    "sector_per_frame": 10.0,
+    "fps": 15.0,
+    "duration_seconds": 94.9333,
+    "kinds": {
+      "video": 12460,
+      "audio": 1754,
+      "padding": 25
+    },
+    "audio": [
+      {
+        "file": 1,
+        "channel": 1,
+        "coding": 1,
+        "sectors": 1754
+      }
+    ],
+    "audio_sector_gaps": {
+      "8": 1753
+    },
+    "frame_sectors": [
+      8,
+      9
+    ],
+    "max_header_size": 15992,
+    "first_frames": [
+      [
+        1,
+        0,
+        9,
+        14484,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        2,
+        10,
+        9,
+        14892,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        3,
+        20,
+        9,
+        15400,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        4,
+        30,
+        8,
+        14660,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "last_frames": [
+      [
+        1423,
+        14220,
+        9,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ],
+      [
+        1424,
+        14230,
+        8,
+        2352,
+        320,
+        208,
+        1,
+        2
+      ]
+    ],
+    "invocations": []
+  }
+]

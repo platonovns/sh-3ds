@@ -1,0 +1,21 @@
+; Screen-space vertices with UV and color for the future primitive adapter.
+.fvec projection[4]
+.constf constants(0.0, 1.0, 0.0, 0.0)
+.out outpos position
+.out outuv texcoord0
+.out outcolor color
+.alias inpos v0
+.alias inuv v1
+.alias incolor v2
+
+.proc main
+    mov r0.xyz, inpos
+    mov r0.w, constants.y
+    dp4 outpos.x, projection[0], r0
+    dp4 outpos.y, projection[1], r0
+    dp4 outpos.z, projection[2], r0
+    dp4 outpos.w, projection[3], r0
+    mov outuv, inuv
+    mov outcolor, incolor
+    end
+.end

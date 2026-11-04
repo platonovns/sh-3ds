@@ -1,0 +1,15 @@
+C1_20670 frame=1 repeats=20 native_ms=0.784650 pc_ms=1.296000 native_fps=1274.45 speedup=1.652
+C1_20670 frame=1033 repeats=20 native_ms=1.398100 pc_ms=1.451000 native_fps=715.26 speedup=1.038
+C1_20670 frame=2067 repeats=20 native_ms=0.536750 pc_ms=1.086750 native_fps=1863.06 speedup=2.025
+M2_01190 frame=1 repeats=20 native_ms=1.324900 pc_ms=1.489400 native_fps=754.77 speedup=1.124
+M2_01190 frame=59 repeats=20 native_ms=1.151150 pc_ms=1.287550 native_fps=868.70 speedup=1.118
+M2_01190 frame=119 repeats=20 native_ms=0.459150 pc_ms=1.117750 native_fps=2177.94 speedup=2.434
+M7_01536 frame=1 repeats=20 native_ms=1.329700 pc_ms=1.344600 native_fps=752.05 speedup=1.011
+M7_01536 frame=75 repeats=20 native_ms=1.196300 pc_ms=1.418650 native_fps=835.91 speedup=1.186
+M7_01536 frame=150 repeats=20 native_ms=1.256850 pc_ms=1.491100 native_fps=795.64 speedup=1.186
+MD_03780 frame=1 repeats=20 native_ms=0.533650 pc_ms=1.107000 native_fps=1873.89 speedup=2.074
+MD_03780 frame=189 repeats=20 native_ms=1.233700 pc_ms=1.296650 native_fps=810.57 speedup=1.051
+MD_03780 frame=378 repeats=20 native_ms=0.480950 pc_ms=1.282400 native_fps=2079.22 speedup=2.666
+ZZ_14239 frame=1 repeats=20 native_ms=1.633600 pc_ms=1.817650 native_fps=612.14 speedup=1.113
+ZZ_14239 frame=712 repeats=20 native_ms=2.072550 pc_ms=2.691250 native_fps=482.50 speedup=1.299
+ZZ_14239 frame=1424 repeats=20 native_ms=0.811700 pc_ms=2.049300 native_fps=1231.98 speedup=2.525

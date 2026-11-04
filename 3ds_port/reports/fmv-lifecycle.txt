@@ -1,0 +1,13 @@
+scenario=0 result=0 frames=112 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=1 result=1 frames=2 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=2 result=0 frames=112 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=3 result=2 frames=2 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=4 result=-1 frames=0 joined=0 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=5 result=0 frames=112 joined=1 cleared=1 freed=1 end=1 fallback=1 presentation=PASS PASS
+scenario=6 result=-1 frames=0 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=7 result=-1 frames=0 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=8 result=-1 frames=0 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=9 result=-1 frames=0 joined=0 cleared=0 freed=0 end=0 fallback=0 presentation=PASS PASS
+scenario=10 result=-1 frames=0 joined=0 cleared=0 freed=0 end=0 fallback=0 presentation=PASS PASS
+scenario=11 result=0 frames=111 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS
+scenario=12 result=0 frames=112 joined=1 cleared=1 freed=1 end=1 fallback=0 presentation=PASS PASS

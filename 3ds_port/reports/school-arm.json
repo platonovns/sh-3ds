@@ -1,0 +1,268 @@
+{
+  "status": "PASS",
+  "execution": "Proportional ARM subsystem checks; synthetic nearby states, no playthrough.\n\nReal disc overlay data and original event/item/piano/boss/save routines execute.\nAudio, GPU and clocks use the established runner boundaries. No game candidate.\n",
+  "checks": [
+    {
+      "case": "header_event_closure",
+      "map": "map1_s00",
+      "events": 100,
+      "item_events": 2,
+      "transitions": 3
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s00",
+      "index": 33,
+      "item": "InvItemId_GoldMedallion",
+      "result": [
+        0,
+        97,
+        6,
+        33
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s00",
+      "index": 36,
+      "item": "InvItemId_SilverMedallion",
+      "result": [
+        0,
+        98,
+        9,
+        36
+      ]
+    },
+    {
+      "case": "header_event_closure",
+      "map": "map1_s01",
+      "events": 103,
+      "item_events": 1,
+      "transitions": 2
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s01",
+      "index": 13,
+      "item": "InvItemId_Chemical",
+      "result": [
+        0,
+        96,
+        6,
+        13
+      ]
+    },
+    {
+      "case": "header_event_closure",
+      "map": "map1_s02",
+      "events": 120,
+      "item_events": 1,
+      "transitions": 4
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s02",
+      "index": 35,
+      "item": "InvItemId_PictureCard",
+      "result": [
+        0,
+        85,
+        11,
+        35
+      ]
+    },
+    {
+      "case": "header_event_closure",
+      "map": "map1_s03",
+      "events": 102,
+      "item_events": 5,
+      "transitions": 3
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s03",
+      "index": 21,
+      "item": "InvItemId_RubberBall",
+      "result": [
+        0,
+        99,
+        15,
+        21
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s03",
+      "index": 22,
+      "item": "InvItemId_RubberBall",
+      "result": [
+        0,
+        99,
+        15,
+        21
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s03",
+      "index": 46,
+      "item": "InvItemId_ClassroomKey",
+      "result": [
+        0,
+        70,
+        4,
+        46
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s03",
+      "index": 78,
+      "item": "InvItemId_LibraryReserveKey",
+      "result": [
+        0,
+        69,
+        3,
+        78
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map1_s03",
+      "index": 101,
+      "item": "InvItemId_ChannelingStone",
+      "result": [
+        0,
+        88,
+        16,
+        101
+      ]
+    },
+    {
+      "case": "header_event_closure",
+      "map": "map1_s04",
+      "events": 2,
+      "item_events": 0,
+      "transitions": 0
+    },
+    {
+      "case": "header_event_closure",
+      "map": "map1_s05",
+      "events": 3,
+      "item_events": 0,
+      "transitions": 1
+    },
+    {
+      "case": "header_event_closure",
+      "map": "map1_s06",
+      "events": 48,
+      "item_events": 0,
+      "transitions": 2
+    },
+    {
+      "case": "animation_binary_equivalence",
+      "map": "map1_s01",
+      "symbol": "CAT_ANIM_INFOS",
+      "entries": 10
+    },
+    {
+      "case": "animation_binary_equivalence",
+      "map": "map1_s02",
+      "symbol": "CREEPER_ANIM_INFOS",
+      "entries": 36
+    },
+    {
+      "case": "animation_binary_equivalence",
+      "map": "map1_s03",
+      "symbol": "LOCKER_DEAD_BODY_ANIM_INFOS",
+      "entries": 8
+    },
+    {
+      "case": "animation_binary_equivalence",
+      "map": "map1_s05",
+      "symbol": "SPLIT_HEAD_ANIM_INFOS",
+      "entries": 30
+    },
+    {
+      "case": "animation_binary_equivalence",
+      "map": "map1_s06",
+      "symbol": "SPLIT_HEAD_ANIM_INFOS",
+      "entries": 30
+    },
+    {
+      "case": "original_piano_correct_sequence_and_wrong_key_reset",
+      "sequence": [
+        2,
+        9,
+        10,
+        7,
+        1
+      ]
+    },
+    {
+      "case": "native_SetDrawStp_packet_tag_and_original_command",
+      "length_words": 2,
+      "command": "e6000001"
+    },
+    {
+      "case": "original_boss_damage_death_and_flag",
+      "difficulty": 0,
+      "first": [
+        25500,
+        24700,
+        8,
+        0
+      ],
+      "last": [
+        25500,
+        0,
+        6,
+        1
+      ],
+      "hits_limit": 40,
+      "limitation": "Synthetic registered ordinary damage packets; aiming, player hit geometry and full encounter are not simulated"
+    },
+    {
+      "case": "original_boss_damage_death_and_flag",
+      "difficulty": 1,
+      "first": [
+        25500,
+        25100,
+        8,
+        0
+      ],
+      "last": [
+        25500,
+        0,
+        6,
+        1
+      ],
+      "hits_limit": 80,
+      "limitation": "Synthetic registered ordinary damage packets; aiming, player hit geometry and full encounter are not simulated"
+    },
+    {
+      "case": "original_save_container_checksum_and_full_record_roundtrip",
+      "map": 3,
+      "boss_state": 0
+    },
+    {
+      "case": "original_save_container_checksum_and_full_record_roundtrip",
+      "map": 6,
+      "boss_state": 0
+    },
+    {
+      "case": "original_save_container_checksum_and_full_record_roundtrip",
+      "map": 9,
+      "boss_state": 1
+    },
+    {
+      "case": "original_save_container_checksum_and_full_record_roundtrip",
+      "map": 10,
+      "boss_state": 1
+    }
+  ],
+  "elf_sha256": "aad8c00cc3a218031297b663c0782b950b23a3b3b7e01e150c8e9b96601f296e",
+  "hardware_accepted": false,
+  "full_playthrough": false,
+  "original_memcard_written": false
+}

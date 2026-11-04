@@ -1,0 +1,154 @@
+{
+  "source_id": "native-fmv-src-59d6e586ef70b529",
+  "source_sha256": "59d6e586ef70b529c52435223b35a6c9fc38c1f83c6d6b9cc5036b79ccf834cc",
+  "text_hash_policy": "UTF-8 bytes with CRLF normalized to LF",
+  "context_base": "518c44a9e0e84b1155638e496d6977030093d11c",
+  "accepted_context": "stage11a-cpu-B-src-8c51d74ee1feb7e0",
+  "hardware_candidate": false,
+  "published": false,
+  "sources": {
+    "3ds_port/Makefile.fmv": {
+      "bytes": 848,
+      "sha256": "948b87121b30f33b04e2ae5ae60fd9b1c77c87c524272d9c6892898424970ef1"
+    },
+    "3ds_port/Makefile.game": {
+      "bytes": 15382,
+      "sha256": "fa8d19521cf13d2f88287be4a8b43a4c97af797f62e98da525b5e42e5d7b4999"
+    },
+    "3ds_port/fmv/compile-flags.json": {
+      "bytes": 1088,
+      "sha256": "eb4ca1ee2c45341a5494ee41dda44a2022a2e7788a278e8533fd605282187817"
+    },
+    "3ds_port/include/fmv_mdec.h": {
+      "bytes": 558,
+      "sha256": "eb681721446b263e1cd53109f3bb2aa8db5723c48f273c949360abe9eb0765b7"
+    },
+    "3ds_port/include/fmv_stream.h": {
+      "bytes": 1392,
+      "sha256": "bb30e6ca6cb211a4171e0f77471b0d876d89a9965f8b5723b276e042f8f52374"
+    },
+    "3ds_port/include/game_audio.h": {
+      "bytes": 790,
+      "sha256": "30c032f01d282b6d3d6513665c86aef03144a147709c68ef395e63297cf73e36"
+    },
+    "3ds_port/include/game_fmv.h": {
+      "bytes": 412,
+      "sha256": "97d4829e44054a252a5dcf3badd8175f731f8979db80420c6b5d82812aae0885"
+    },
+    "3ds_port/include/psx_disc.h": {
+      "bytes": 2355,
+      "sha256": "a24c56b01f5fb7d3bf922d612a707a290063c7e4d04a5132d2abcced62665b1d"
+    },
+    "3ds_port/source/fmv_mdec.c": {
+      "bytes": 23283,
+      "sha256": "ea8503e6aa933bb8364f6d225950e261a9ee9fa01ec7929d8126a8f89816e653"
+    },
+    "3ds_port/source/fmv_stream.c": {
+      "bytes": 4720,
+      "sha256": "7f91bca0dbfe88f140b58ff2c8d5b10e735a8d5e967d458eaa9ec026f7fdee47"
+    },
+    "3ds_port/source/game_audio_ndsp.c": {
+      "bytes": 10170,
+      "sha256": "a2f8663004eaf0572c248481146e3c663b3ae4a7d8ac04993967a5def36f37c4"
+    },
+    "3ds_port/source/game_fmv.c": {
+      "bytes": 11067,
+      "sha256": "31cd6969696a2a715b94f0929e5dd028f1ad81e99c61264c554cbb751ea844d9"
+    },
+    "3ds_port/source/main_game.c": {
+      "bytes": 64171,
+      "sha256": "3bd017ea756be98e73b5796a384ab1fe9add85a765f8334555775cb3a89d06e5"
+    },
+    "3ds_port/source/psx_disc.c": {
+      "bytes": 10745,
+      "sha256": "7bcaba4b6eb38f27f836be38e0a20a1134c8dc1bd88f6ad0960ce321c3dafd99"
+    },
+    "3ds_port/tests/fmv_arm_codec_fixture.c": {
+      "bytes": 217,
+      "sha256": "01de34d2959d7a701f3f351756d962f0f0cccbe83aed55312b42206022804648"
+    },
+    "3ds_port/tests/fmv_bench.c": {
+      "bytes": 1597,
+      "sha256": "c0dd8e3d765147955eb4fe1aff260ab9f2a1a1036f2712090f0c8e5d426079f1"
+    },
+    "3ds_port/tests/fmv_fake/3ds.h": {
+      "bytes": 1659,
+      "sha256": "3c3ea0982537f7aaf16be94234e7572e5dc5ae3f5660c4950a128c05b97fdd1e"
+    },
+    "3ds_port/tests/fmv_lifecycle.c": {
+      "bytes": 6776,
+      "sha256": "67109ccc026539399eb76db2003775725684862465d4d9dc17e4c7f3ec583763"
+    },
+    "3ds_port/tests/fmv_offline.c": {
+      "bytes": 3899,
+      "sha256": "a663d0db50a22f062045e80429fb1a76620aa063c1ae21333734507e50b85938"
+    },
+    "3ds_port/tools/adapt_fmv_mdec.py": {
+      "bytes": 5647,
+      "sha256": "b820d4ce5e8d207a78b647c2cb8bce0fe3846f71f0fd32f69d738e01f3f4deb7"
+    },
+    "3ds_port/tools/compile_fmv_arm.py": {
+      "bytes": 2510,
+      "sha256": "c6f9e3139e9bfa09f7051a3aabc4192d89b99999e4b76841d20e998d43c371d9"
+    },
+    "3ds_port/tools/inventory_fmv.py": {
+      "bytes": 4156,
+      "sha256": "ab6c2c1d3894e662fc713207eda07e3b5b6fbe099e7736305b2cc1b0331d820a"
+    },
+    "3ds_port/tools/link_fmv_internal.py": {
+      "bytes": 2635,
+      "sha256": "3a8096ade8399ce8f6099453bddd108f8954092999d620bd18b1e1e61660bc5b"
+    },
+    "3ds_port/tools/package_fmv.py": {
+      "bytes": 5841,
+      "sha256": "085c7743687019e3db44f8936e1d9fe86dcc0bec22c8f99fdd97e57460b159f4"
+    },
+    "3ds_port/tools/run_fmv_offline.py": {
+      "bytes": 3340,
+      "sha256": "d821b38efbc7b6e2afe552813c61beea921a0f9f2f79f3ce357e2ebe43f37784"
+    },
+    "3ds_port/tools/test_fmv_arm.py": {
+      "bytes": 4558,
+      "sha256": "9187d6eac79c22d5815dc6c04108f3582b57bb303c470d067bcf8a16c6396b64"
+    },
+    "pc_port/src/fmv/fmv_player.cpp": {
+      "bytes": 100102,
+      "sha256": "d88fcf97d5a25a9de916f50740e4b0714f4ec8fc5139c80ae93b700352177c40"
+    },
+    "pc_port/src/fmv/mdec.c": {
+      "bytes": 24309,
+      "sha256": "b09edcdb0aa444d4bd5715e17cefef4a0441be767518473784ad7cb91e3eb132"
+    },
+    "pc_port/src/xa_player_software.c": {
+      "bytes": 30141,
+      "sha256": "7bd25e9a2c5df757198245e8e28148e578f51e50e204a18fbb6cc38b99ef4c66"
+    },
+    "src/main/filetable.c.USA.inc": {
+      "bytes": 192703,
+      "sha256": "d8075b12f1423c5ea46072ddcc9a5074f6954614b333b9c60e79c5de708f5023"
+    },
+    "src/screens/stream/stream.c": {
+      "bytes": 13248,
+      "sha256": "e100adfac46e675119122e36f8d824cd9012e84954f1a5e412de85424c07cb1c"
+    }
+  },
+  "reports": {
+    "fmv-arm-codec.json": "8dc494714b81495ed46773d511d9cb3db4c1d2d196f6259373d7f91801236cda",
+    "fmv-arm-compile.json": "0161a39de1f045bfcb799f16d2342aadd7f55344b59ba1ada6aa3410e06f274c",
+    "fmv-host.json": "42f2d1e3c26f2986ad8902458493125f11d4c186f602096be4e029976d18f0e2",
+    "fmv-internal-link.json": "a1709b17017bb07d750e036eb3b3ee1c483cd47ac7c08f0827b93b8eed578ab4",
+    "fmv-inventory.json": "4d2c30860ded59ad8326c556a9dff9751a97b234e70ec303009342242fa8458b",
+    "fmv-lifecycle.txt": "eda317bdc37eff2548db2a50853ebca2069dcbfe78c655119ee2ad60edba9c94",
+    "fmv-offline.txt": "a56e4b60cba87758c96861a655cfb1d47c1eeba72ad701c1e905a382498842bf",
+    "fmv-throughput.txt": "507ee6df36e3d62f2aa228f51b4a2994f4231d023c4efdfb363950859c9da5c0"
+  },
+  "memory": {
+    "movie_heap": 867856,
+    "linear_pcm": 64512,
+    "disc_cache": 75264,
+    "worker_stack": 32768,
+    "video_slots": 4,
+    "rgb_frame_bytes": 199680
+  },
+  "total_movie_bytes": 1040400
+}

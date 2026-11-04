@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "scope": "Execute linked ARM codec instructions; SDK and gameplay are absent.",
+  "elf_sha256": "1062488b161f7629a478031b9c2285fd614a9268837dc5c98e41353048949bfa",
+  "frames": [
+    {
+      "movie": "C1_20670",
+      "frame": 1000,
+      "rgb_sha256": "7327c872a80a265a08d1493e2a3fc76ec0705696a04c19a4261e9d47318df47a",
+      "unicorn_wall_seconds": 0.11358453100001498
+    },
+    {
+      "movie": "M2_01190",
+      "frame": 60,
+      "rgb_sha256": "f4654cd43aaa8aa399be6a07da92ce7ebd433107082c57cfcefa42ce5deb5506",
+      "unicorn_wall_seconds": 0.10612529799993808
+    },
+    {
+      "movie": "M7_01536",
+      "frame": 75,
+      "rgb_sha256": "d9bb28b01e4b5438e288678d6e47f3a059e6d3c5185897e750a478a8e574c973",
+      "unicorn_wall_seconds": 0.11987057500004994
+    },
+    {
+      "movie": "Z1_16180",
+      "frame": 800,
+      "rgb_sha256": "df2068ed43be1551517fe6dcef1485a4046473abf6eaa27685cfe81d7fd2ac45",
+      "unicorn_wall_seconds": 0.14762302700000873
+    }
+  ],
+  "audio_sectors_compared": 2,
+  "performance_warning": "Unicorn wall time is host emulator time, not ARM11 hardware throughput"
+}

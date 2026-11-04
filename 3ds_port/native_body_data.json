@@ -1,0 +1,54 @@
+[
+  {
+    "symbol": "D_80028544",
+    "address": "0x80028544"
+  },
+  {
+    "symbol": "D_8002B2CC",
+    "address": "0x8002B2CC"
+  },
+  {
+    "symbol": "D_800C3960",
+    "address": "0x800C3960"
+  },
+  {
+    "symbol": "D_800C3961",
+    "address": "0x800C3961"
+  },
+  {
+    "symbol": "D_800C3962",
+    "address": "0x800C3962"
+  },
+  {
+    "symbol": "D_800C3963",
+    "address": "0x800C3963"
+  },
+  {
+    "symbol": "D_800C39A0",
+    "address": "0x800C39A0"
+  },
+  {
+    "symbol": "D_800C42D0",
+    "address": "0x800C42D0"
+  },
+  {
+    "symbol": "D_800C42D2",
+    "address": "0x800C42D2"
+  },
+  {
+    "symbol": "D_800C4606",
+    "address": "0x800C4606"
+  },
+  {
+    "symbol": "g_CollisionTriggerFlags",
+    "address": "0x800BCE14"
+  },
+  {
+    "symbol": "vcRefPosSt",
+    "address": "0x800BCDF8"
+  },
+  {
+    "symbol": "vcWork",
+    "address": "0x800B9CD0"
+  }
+]

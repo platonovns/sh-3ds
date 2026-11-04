@@ -1,0 +1,18 @@
+# Movie-only integration. Include after SDK_FLAGS/ENGINE_CFLAGS/OFILES exist.
+# No hardware binary or publication target is provided by this fragment.
+FMV_NATIVE ?= 1
+ifeq ($(FMV_NATIVE),1)
+ENGINE_CFLAGS += -DSH_3DS_FMV=1
+SDK_FLAGS += -DSH_3DS_FMV=1
+ifneq ($(strip $(FMV_DEV_MOVIE)),)
+SDK_FLAGS += -DSH_FMV_DEV_MOVIE=$(FMV_DEV_MOVIE)
+endif
+FMV_OBJECTS := $(GAME_BUILD)/game_fmv.o $(GAME_BUILD)/fmv_stream.o $(GAME_BUILD)/fmv_mdec.o
+OFILES += $(FMV_OBJECTS)
+$(GAME_BUILD)/game_fmv.o: source/game_fmv.c include/game_fmv.h include/fmv_stream.h include/fmv_mdec.h
+	$(CC) $(SDK_FLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/fmv_stream.o: source/fmv_stream.c include/fmv_stream.h
+	$(CC) $(SDK_FLAGS) -MMD -MP -c $< -o $@
+$(GAME_BUILD)/fmv_mdec.o: source/fmv_mdec.c include/fmv_mdec.h
+	$(CC) $(SDK_FLAGS) -Wno-unused-const-variable -MMD -MP -c $< -o $@
+endif

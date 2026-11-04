@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+# Preserve baseline source identity: mixed final line ending is intentional.
+3ds_port/source/game_lower.c -text whitespace=cr-at-eol
+3ds_port/source/school_anim_relocate.c -text whitespace=cr-at-eol

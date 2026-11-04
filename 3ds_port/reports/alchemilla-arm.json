@@ -1,0 +1,607 @@
+{
+  "status": "PASS",
+  "execution": "Focused original Alchemilla component checks in the ARM internal ELF.\n\nNearby states deliberately enter individual original event steps. These are\nnot an integrated chapter playthrough, hardware acceptance, graphics, audio,\nFMV decoding or a memory-card write test. Original disc overlays supply data.\n",
+  "checks": [
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map3_s00",
+      "index": 15,
+      "events": 16,
+      "uses": 0,
+      "transitions": 3
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map3_s01",
+      "index": 16,
+      "events": 110,
+      "uses": 5,
+      "transitions": 1
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map3_s02",
+      "index": 17,
+      "events": 20,
+      "uses": 0,
+      "transitions": 1
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map3_s03",
+      "index": 18,
+      "events": 135,
+      "uses": 6,
+      "transitions": 3
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map3_s04",
+      "index": 19,
+      "events": 52,
+      "uses": 1,
+      "transitions": 6
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map3_s05",
+      "index": 20,
+      "events": 103,
+      "uses": 4,
+      "transitions": 4
+    },
+    {
+      "case": "native_header_event_and_character_callback_closure",
+      "map": "map3_s06",
+      "index": 21,
+      "events": 49,
+      "uses": 0,
+      "transitions": 1
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s01",
+      "event": 4,
+      "item": "InvItemId_PlasticBottle",
+      "result": [
+        0,
+        101,
+        7,
+        7
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s01",
+      "event": 5,
+      "item": "InvItemId_PlasticBottle",
+      "result": [
+        0,
+        101,
+        7,
+        5
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s01",
+      "event": 6,
+      "item": "InvItemId_PlasticBottle",
+      "result": [
+        0,
+        101,
+        7,
+        6
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s01",
+      "event": 7,
+      "item": "InvItemId_PlasticBottle",
+      "result": [
+        0,
+        101,
+        7,
+        7
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s01",
+      "event": 43,
+      "item": "InvItemId_BasementKey",
+      "result": [
+        0,
+        73,
+        4,
+        43
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s03",
+      "event": 14,
+      "item": "InvItemId_BloodPack",
+      "result": [
+        0,
+        107,
+        17,
+        14
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s03",
+      "event": 21,
+      "item": "InvItemId_VideoTape",
+      "result": [
+        0,
+        110,
+        12,
+        21
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s03",
+      "event": 78,
+      "item": "InvItemId_PlateOfTurtle",
+      "result": [
+        0,
+        103,
+        7,
+        78
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s03",
+      "event": 79,
+      "item": "InvItemId_PlateOfHatter",
+      "result": [
+        1,
+        104,
+        7,
+        79
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s03",
+      "event": 80,
+      "item": "InvItemId_PlateOfCat",
+      "result": [
+        2,
+        105,
+        7,
+        80
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s03",
+      "event": 81,
+      "item": "InvItemId_PlateOfQueen",
+      "result": [
+        3,
+        106,
+        7,
+        81
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s04",
+      "event": 12,
+      "item": "InvItemId_ExaminationRoomKey",
+      "result": [
+        0,
+        75,
+        3,
+        12
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s05",
+      "event": 12,
+      "item": "InvItemId_Lighter",
+      "result": [
+        0,
+        109,
+        8,
+        12
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s05",
+      "event": 14,
+      "item": "InvItemId_DisinfectingAlcohol",
+      "result": [
+        0,
+        108,
+        6,
+        14
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s05",
+      "event": 15,
+      "item": "InvItemId_Lighter",
+      "result": [
+        1,
+        109,
+        5,
+        15
+      ]
+    },
+    {
+      "case": "original_inventory_use_dispatch",
+      "map": "map3_s05",
+      "event": 33,
+      "item": "InvItemId_BasementStoreroomKey",
+      "result": [
+        0,
+        74,
+        3,
+        33
+      ]
+    },
+    {
+      "case": "original_key_consumption_and_persistent_unlock",
+      "map": "map3_s01",
+      "item": "InvItemId_BasementKey",
+      "flag": 210
+    },
+    {
+      "case": "original_key_consumption_and_persistent_unlock",
+      "map": "map3_s05",
+      "item": "InvItemId_BasementStoreroomKey",
+      "flag": 256
+    },
+    {
+      "case": "original_key_consumption_and_persistent_unlock",
+      "map": "map3_s04",
+      "item": "InvItemId_ExaminationRoomKey",
+      "flag": 258
+    },
+    {
+      "case": "original_basement_key_pickup_generator_decline_and_power_on",
+      "flags": [
+        209,
+        210,
+        211
+      ],
+      "fixture": "separate pickup and generator nearby states; key consumption verified above"
+    },
+    {
+      "case": "original_extra_elevator_floor_requires_both_map_marks",
+      "both_map_marks": false,
+      "flag_224": 0,
+      "result": [
+        0,
+        4
+      ],
+      "fixture": "original button click; background drawing suppressed"
+    },
+    {
+      "case": "original_extra_elevator_floor_requires_both_map_marks",
+      "both_map_marks": true,
+      "flag_224": 1,
+      "result": [
+        1,
+        5
+      ],
+      "fixture": "original button click; background drawing suppressed"
+    },
+    {
+      "case": "optional_original_bottle_replaced_by_unknown_liquid",
+      "result": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fixture": "completion step 6"
+    },
+    {
+      "case": "original_fixed_colored_slot_rejects_player_plate",
+      "result": [
+        10,
+        0,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "case": "original_wrong_placement_persists_and_occupied_slot_rejects",
+      "flags": [
+        269
+      ],
+      "result": [
+        10,
+        0,
+        1,
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "case": "original_plate_removal_inventory_return_and_correct_solution",
+      "result": [
+        9,
+        1,
+        0,
+        1,
+        2,
+        3
+      ],
+      "flags": [
+        265,
+        270,
+        275,
+        280
+      ],
+      "draw_boundary": "original plate draw routine suppressed"
+    },
+    {
+      "case": "original_alcohol_then_lighter_hidden_passage_completion",
+      "result": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fixture": "separate completion steps 8 and 20; Gfx_MapInitMapEffectsUpdate is a graphics boundary because camera road context is absent; animation/particles not simulated"
+    },
+    {
+      "case": "original_blood_pack_sets_three_bloodsuckers_and_persistent_access",
+      "result": [
+        0,
+        0,
+        0,
+        1,
+        4,
+        4,
+        4
+      ],
+      "fixture": "steps 7/9/11; no creature motion or cutscene playthrough"
+    },
+    {
+      "case": "original_bloodsucker_initialization_reconstructs_animation_from_saved_flag",
+      "flag_250": 0,
+      "result": [
+        2,
+        0,
+        23,
+        2,
+        1,
+        25,
+        2,
+        2,
+        27
+      ]
+    },
+    {
+      "case": "original_bloodsucker_initialization_reconstructs_animation_from_saved_flag",
+      "flag_250": 1,
+      "result": [
+        2,
+        0,
+        17,
+        2,
+        1,
+        19,
+        2,
+        2,
+        21
+      ]
+    },
+    {
+      "case": "original_fmv_api_parameter_and_return_flag",
+      "map": "map3_s00",
+      "param": 13,
+      "file": 2059,
+      "blocks": 313,
+      "decoding_tested": false
+    },
+    {
+      "case": "original_fmv_api_parameter_and_return_flag",
+      "map": "map3_s04",
+      "param": 10,
+      "file": 2062,
+      "blocks": 303,
+      "decoding_tested": false
+    },
+    {
+      "case": "original_actor_scene_completion_returns_control",
+      "map": "map3_s00",
+      "flag": 198,
+      "result": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fixture_step": 38
+    },
+    {
+      "case": "original_actor_scene_completion_returns_control",
+      "map": "map3_s04",
+      "flag": 294,
+      "result": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fixture_step": 26
+    },
+    {
+      "case": "original_actor_scene_completion_returns_control",
+      "map": "map3_s06",
+      "flag": 295,
+      "result": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fixture_step": 33
+    },
+    {
+      "case": "original_return_chapter_antique_shop_key_pickup",
+      "event": 2
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s00",
+      "phase": 0,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s00",
+      "phase": 1,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s00",
+      "phase": 2,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s01",
+      "phase": 0,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s01",
+      "phase": 1,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s01",
+      "phase": 2,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s02",
+      "phase": 0,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s02",
+      "phase": 1,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s02",
+      "phase": 2,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s03",
+      "phase": 0,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s03",
+      "phase": 1,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s03",
+      "phase": 2,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s04",
+      "phase": 0,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s04",
+      "phase": 1,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s04",
+      "phase": 2,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s05",
+      "phase": 0,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s05",
+      "phase": 1,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s05",
+      "phase": 2,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s06",
+      "phase": 0,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s06",
+      "phase": 1,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    },
+    {
+      "case": "original_save_checksum_roundtrip_and_corruption_rejection",
+      "map": "map3_s06",
+      "phase": 2,
+      "includes": "world/progress/plate flags, UnknownLiquid, enemy state"
+    }
+  ],
+  "failure": null,
+  "elf_sha256": "a2d1781304ab9c8e5599a08b20bd50400956866d5c15b66da059813b519e838d",
+  "invalid_memory": [],
+  "hardware_accepted": false,
+  "full_playthrough": false,
+  "original_memcard_written": false,
+  "fmv_decoding_tested_here": false,
+  "presentation_boundaries": [
+    "Gfx_CursorDraw",
+    "Game_TimerUpdate",
+    "Event_DisplayMapMsg",
+    "Gfx_PickupItemAnimate",
+    "Event_ScreenFadeCmd",
+    "Event_BgTextureCmd",
+    "Gfx_MapInitMapEffectsUpdate",
+    "map3_s03_func_800D17F8",
+    "open_main"
+  ]
+}

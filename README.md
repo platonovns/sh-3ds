@@ -2,6 +2,7 @@
 
 <img width="1163" height="777" alt="image" src="https://github.com/user-attachments/assets/f78eabb4-2197-4022-a9b8-c39e0a15398f" />
 
+https://www.youtube.com/watch?v=DMqVBZ0_AkQ
 
 SH-3DS is a native port of the original **Silent Hill** for the New Nintendo
 3DS family. It runs the ported game code on the console; it is not PlayStation
